@@ -49,11 +49,13 @@ import numpy as np
 import datetime
 import math
 
-from WindMetaVarRulesets import parse_BIM
-from WindClassRulesets import auto_populate
-from WindWMUHRulesets import WMUH_config
-from WindWSFRulesets import WSF_config
-
+from WindMetaVarRulesets import *
+from WindClassRulesets import *
+from WindWMUHRulesets import *
+from WindWSFRulesets import *
+from FloodAssmRulesets import *
+from FloodClassRulesets import *
+from FloodRulesets import *
 
 def auto_populate(BIM):
     """
@@ -84,8 +86,9 @@ def auto_populate(BIM):
 
     # identify the building class
     bldg_class = building_class(BIM_ap)
+    BIM_ap.update({'bldg_class': bldg_class})
 
-    print(bldg_class)
+    #print(bldg_class)
 
     # prepare the building configuration string
     if bldg_class == 'WSF':
