@@ -52,28 +52,23 @@ def parse_BIM(BIM_in):
     """
     Parses the information provided in the BIM model.
 
-    The parameters below list the expected inputs
+    The parameters below list the expected metadata in the BIM file
 
     Parameters
     ----------
-    stories: str
+    NumberOfStories: str
         Number of stories
-    yearBuilt: str
+    YearBuilt: str
         Year of construction.
-    roofType: {'hip', 'hipped', 'gabled', 'gable', 'flat'}
+    RoofShape: {'hip', 'hipped', 'gabled', 'gable', 'flat'}
         One of the listed roof shapes that best describes the building.
-    occupancy: str
+    OccupancyType: str
         Occupancy type.
-    buildingDescription: str
-        MODIV code that provides additional details about the building
-    structType: {'Stucco', 'Frame', 'Stone', 'Brick'}
-        One of the listed structure types that best describes the building.
-    V_design: string
-        Ultimate Design Wind Speed was introduced in the 2012 IBC. Officially
-        called “Ultimate Design Wind Speed (Vult); equivalent to the design
-        wind speeds taken from hazard maps in ASCE 7 or ATC's API. Unit is
-        assumed to be mph.
-    area: float
+    BuildingType: str
+        Core construction material type
+    DWSII: float
+        Design wind speed II as per ASCE 7 in mph
+    Area: float
         Plan area in ft2.
     z0: string
         Roughness length that characterizes the surroundings.
@@ -255,33 +250,33 @@ def parse_BIM(BIM_in):
 
     # first, pull in the provided data
     BIM = dict(
-        occupancy_class=str(oc),
-        bldg_type=int(buildingtype),
-        year_built=int(yearbuilt),
+        OccupancyClass=str(oc),
+        BuildingType=int(buildingtype),
+        YearBuilt=int(yearbuilt),
         # double check with Tracey for format - (NumberStories0 is 4-digit code)
         # (NumberStories1 is image-processed story number)
-        stories=int(nstories),
-        area=float(area),
-        flood_zone=floodzone_fema,
+        NumberOfStories=int(nstories),
+        PlanArea=float(area),
+        FloodZone=floodzone_fema,
         V_ult=float(dws),
-        avg_jan_temp=ap_ajt[BIM_in.get('AvgJanTemp','Below')],
-        roof_shape=ap_RoofType[BIM_in['RoofShape']],
-        roof_slope=float(BIM_in.get('RoofSlope',0.25)), # default 0.25
-        sheathing_t=float(BIM_in.get('SheathingThick',1.0)), # default 1.0
-        roof_system=str(ap_RoofSyste[roof_system]), # only valid for masonry structures
-        garage_tag=float(BIM_in.get('Garage',-1.0)),
-        lulc=BIM_in.get('LULC',-1),
-        z0 = float(BIM_in.get('z0',-1)), # if the z0 is already in the input file
-        Terrain = BIM_in.get('Terrain',-1),
-        mean_roof_height=float(BIM_in.get('MeanRoofHt',15.0)), # default 15
-        design_level=str(ap_DesignLevel[design_level]), # default engineered
-        no_units=int(nunits),
-        window_area=float(BIM_in.get('WindowArea',0.20)),
-        first_floor_ht1=float(BIM_in.get('FirstFloorHt1',10.0)),
-        split_level=bool(ap_SplitLevel[BIM_in.get('SplitLevel','NO')]), # dfault: no
-        fdtn_type=int(foundation), # default: pile
-        city=BIM_in.get('City','NA'),
-        wind_zone=str(BIM_in.get('WindZone', 'I'))
+        AvgJanTemp=ap_ajt[BIM_in.get('AvgJanTemp','Below')],
+        RoofShape=ap_RoofType[BIM_in['RoofShape']],
+        RoofSlope=float(BIM_in.get('RoofSlope',0.25)), # default 0.25
+        SheathingThickness=float(BIM_in.get('SheathingThick',1.0)), # default 1.0
+        RoofSystem=str(ap_RoofSystem[roof_system]), # only valid for masonry structures
+        Garage=float(BIM_in.get('Garage',-1.0)),
+        LULC=BIM_in.get('LULC',-1),
+        #z0 = float(BIM_in.get('z0',-1)), # if the z0 is already in the input file
+        #Terrain = BIM_in.get('Terrain',-1),
+        MeanRoofHt=float(BIM_in.get('MeanRoofHt',15.0)), # default 15
+        DesignLevel=str(ap_DesignLevel[design_level]), # default engineered
+        NumberOfUnits=int(nunits),
+        WindowArea=float(BIM_in.get('WindowArea',0.20)),
+        FirstFloorElevation=float(BIM_in.get('FirstFloorHt1',10.0)),
+        SplitLevel=bool(ap_SplitLevel[BIM_in.get('SplitLevel','NO')]), # dfault: no
+        FoundationType=int(foundation), # default: pile
+        City=BIM_in.get('City','NA'),
+        WindZone=str(BIM_in.get('WindZone', 'I'))
     )
 
     # add inferred, generic meta-variables
@@ -387,9 +382,9 @@ def parse_BIM(BIM_in):
         # risk of flooding and other wind-borne debris action.
         flood_risk=True,  # TODO: need high water zone for this and move it to inputs!
 
-        HPR=HPR,
-        WBD=WBD,
-        terrain=terrain,
+        HazardProneRegion=HPR,
+        WindBorneDebris=WBD,
+        Terrain=terrain,
     ))
 
     return BIM
