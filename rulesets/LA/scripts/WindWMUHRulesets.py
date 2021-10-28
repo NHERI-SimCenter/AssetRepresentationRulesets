@@ -249,6 +249,16 @@ def WMUH_config(BIM):
     # Buildings with more than 3 stories are mapped to the 3-story configuration
     stories = min(BIM['stories'], 3)
 
+    # extend the BIM dictionary
+    BIM.update(dict(
+        SWR = SWR,
+        roof_cover = roof_cover,
+        roof_quality = roof_quality,
+        RDA = RDA,
+        RWC = RWC,
+        shutters = shutters
+        ))
+
     bldg_config = f"WMUH" \
                   f"{int(stories)}_" \
                   f"{BIM['roof_shape']}_" \
