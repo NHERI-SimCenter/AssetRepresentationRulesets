@@ -262,6 +262,15 @@ def WSF_config(BIM):
                 garage = 'wkd' # Weak
                 shutters = 0 # HAZUS ties weak garage to w/o shutters
 
+    # extend the BIM dictionary
+    BIM.update(dict(
+        SWR = SWR,
+        RDA = RDA,
+        RWC = RWC,
+        shutters = shutters,
+        garage = garage
+        ))
+
     # building configuration tag
     bldg_config = f"WSF" \
                   f"{int(min(BIM['stories'],2))}_" \

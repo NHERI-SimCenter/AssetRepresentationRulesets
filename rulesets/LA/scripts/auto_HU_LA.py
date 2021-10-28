@@ -53,7 +53,9 @@ from WindMetaVarRulesets import *
 from WindClassRulesets import *
 from WindWMUHRulesets import *
 from WindWSFRulesets import *
-
+from FloodAssmRulesets import *
+from FloodClassRulesets import *
+from FloodRulesets import *
 
 def auto_populate(BIM):
     """
