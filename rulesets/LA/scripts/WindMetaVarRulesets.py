@@ -161,7 +161,7 @@ def parse_BIM(BIM_in):
 
 
     # Number of Stories
-    alname_nstories = ['stories', 'NumberofStories0', 'NumberofStories']
+    alname_nstories = ['stories', 'NumberofStories0', 'NumberofStories', 'NumberOfStories']
     try:
         nstories = BIM_in['NumberofStories1']
     except:
@@ -179,6 +179,16 @@ def parse_BIM(BIM_in):
         for i in alname_area:
             if i in BIM_in.keys():
                 area = BIM_in[i]
+                break
+
+    # Design Wind Speed
+    alname_dws = ['DSWII', 'DWSII', 'DesignWindSpeed']
+    try:
+        dws = BIM_in['DSWII']
+    except:
+        for alname in alname_dws:
+            if alname in BIM_in.keys():
+                dws = BIM_in[alname]
                 break
 
     # if getting RES3 then converting it to default RES3A
@@ -253,7 +263,7 @@ def parse_BIM(BIM_in):
         stories=int(nstories),
         area=float(area),
         flood_zone=floodzone_fema,
-        V_ult=float(BIM_in['DSWII']),
+        V_ult=float(dws),
         avg_jan_temp=ap_ajt[BIM_in.get('AvgJanTemp','Below')],
         roof_shape=ap_RoofType[BIM_in['RoofShape']],
         roof_slope=float(BIM_in.get('RoofSlope',0.25)), # default 0.25
