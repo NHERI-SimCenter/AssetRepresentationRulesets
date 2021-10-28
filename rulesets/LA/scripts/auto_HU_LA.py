@@ -84,49 +84,20 @@ def auto_populate(BIM):
 
     # identify the building class
     bldg_class = building_class(BIM_ap)
+    BIM_ap.update({'HazusClassW': bldg_class})
 
-    print(bldg_class)
+    #print(bldg_class)
 
     # prepare the building configuration string
     if bldg_class == 'WSF':
         bldg_config = WSF_config(BIM_ap)
     elif bldg_class == 'WMUH':
         bldg_config = WMUH_config(BIM_ap)
-    elif bldg_class == 'MSF':
-        bldg_config = MSF_config(BIM_ap)
-    elif bldg_class == 'MMUH':
-        bldg_config = MMUH_config(BIM_ap)
-    elif bldg_class == 'MLRM':
-        bldg_config = MLRM_config(BIM_ap)
-    elif bldg_class == 'MLRI':
-        bldg_config = MLRI_config(BIM_ap)
-    elif bldg_class == 'MERB':
-        bldg_config = MERB_config(BIM_ap)
-    elif bldg_class == 'MECB':
-        bldg_config = MECB_config(BIM_ap)
-    elif bldg_class == 'CECB':
-        bldg_config = CECB_config(BIM_ap)
-    elif bldg_class == 'CERB':
-        bldg_config = CERB_config(BIM_ap)
-    elif bldg_class == 'SPMB':
-        bldg_config = SPMB_config(BIM_ap)
-    elif bldg_class == 'SECB':
-        bldg_config = SECB_config(BIM_ap)
-    elif bldg_class == 'SERB':
-        bldg_config = SERB_config(BIM_ap)
-    elif bldg_class == 'MH':
-        bldg_config = MH_config(BIM_ap)
     else:
         raise ValueError(
             f"Building class {bldg_class} not recognized by the "
             f"auto-population routine."
         )
-
-    # prepare the flood rulesets
-    fld_config = FL_config(BIM_ap)
-
-    # prepare the assembly loss compositions
-    hu_assm, fl_assm = Assm_config(BIM_ap)
 
     DL_ap = {
         '_method'      : 'HAZUS MH HU',
@@ -143,16 +114,8 @@ def auto_populate(BIM):
                 'median_quantity': '1.0',
                 'unit'           : 'ea',
                 'distribution'   : 'N/A'
-            }],
-            fld_config: [{
-                'location'       : '1',
-                'direction'      : '1',
-                'median_quantity': '1.0',
-                'unit'           : 'ea',
-                'distribution'   : 'N/A'
             }]
-        },
-        'Combinations' : [hu_assm, fl_assm]
+        }
     }
 
     return BIM_ap, DL_ap
