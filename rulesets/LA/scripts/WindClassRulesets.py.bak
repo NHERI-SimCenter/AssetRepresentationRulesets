@@ -164,3 +164,27 @@ def building_class(BIM):
     else:
         return 'WMUH'
         # if nan building type is provided, return the dominant class
+
+
+def auto_populate(BIM):
+    """
+    Populates the DL model for hurricane assessments in Atlantic County, NJ
+
+    Assumptions:
+    - Everything relevant to auto-population is provided in the Buiding
+    Information Model (BIM).
+    - The information expected in the BIM file is described in the parse_BIM
+    method.
+
+    Parameters
+    ----------
+    BIM_in: dictionary
+        Contains the information that is available about the asset and will be
+        used to auto-popualate the damage and loss model.
+    """
+
+    # parse the BIM data
+    BIM_ap = parse_BIM(BIM)
+
+    # identify the building class
+    bldg_class = building_class(BIM_ap)
