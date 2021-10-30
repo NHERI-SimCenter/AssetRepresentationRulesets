@@ -49,11 +49,10 @@ import numpy as np
 import datetime
 import math
 
-from WindMetaVarRulesets import parse_BIM
-from WindClassRulesets import auto_populate
-from WindWMUHRulesets import WMUH_config
+from MetaVarRulesets import parse_BIM
+from BldgClassRulesets import building_class
 from WindWSFRulesets import WSF_config
-
+from WindWMUHRulesets import WMUH_config
 
 def auto_populate(BIM):
     """
@@ -80,13 +79,11 @@ def auto_populate(BIM):
     """
 
     # parse the BIM data
-    BIM_ap = parse_BIM(BIM)
+    BIM_ap = parse_BIM(BIM, location="LA", hazards=['wind',])
 
     # identify the building class
-    bldg_class = building_class(BIM_ap)
+    bldg_class = building_class(BIM_ap, hazard='wind')
     BIM_ap.update({'HazusClassW': bldg_class})
-
-    #print(bldg_class)
 
     # prepare the building configuration string
     if bldg_class == 'WSF':
@@ -117,5 +114,13 @@ def auto_populate(BIM):
             }]
         }
     }
+
+    # drop keys of internal variables from BIM_ap dict
+    internal_vars = ['V_ult', 'V_asd']
+    for var in internal_vars:
+        try:
+            BIM_ap.pop(var)
+        except:
+            pass
 
     return BIM_ap, DL_ap

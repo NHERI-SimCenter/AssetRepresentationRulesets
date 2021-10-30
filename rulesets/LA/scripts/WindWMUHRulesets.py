@@ -44,7 +44,6 @@
 # Tracy Kijewski-Correa
 
 import random
-import numpy as np
 import datetime
 
 def WMUH_config(BIM):
@@ -140,7 +139,7 @@ def WMUH_config(BIM):
     # The base rule was then extended to the exposures closest to suburban and
     # light suburban, even though these are not considered by the code.
     if year > 2009:
-        if BIM['Terrain'] >= 35: # suburban or light trees
+        if BIM['TerrainRoughness'] >= 35: # suburban or light trees
             if BIM['V_ult'] > 168.0:
                 RDA = '8s'  # 8d @ 6"/6" 'D'
             else:
@@ -254,7 +253,7 @@ def WMUH_config(BIM):
         SecondaryWaterResistance = SWR,
         RoofCover = roof_cover,
         RoofQuality = roof_quality,
-        RoofDeckAttachment = RDA,
+        RoofDeckAttachmentW = RDA,
         RoofToWallConnection = RWC,
         Shutters = shutters
         ))
@@ -268,7 +267,7 @@ def WMUH_config(BIM):
                   f"{RDA}_" \
                   f"{RWC}_" \
                   f"{int(shutters)}_" \
-                  f"{int(BIM['Terrain'])}"
+                  f"{int(BIM['TerrainRoughness'])}"
 
     return bldg_config
 

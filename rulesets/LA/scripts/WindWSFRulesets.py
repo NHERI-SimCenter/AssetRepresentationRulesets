@@ -44,9 +44,7 @@
 # Tracy Kijewski-Correa
 
 import random
-import numpy as np
 import datetime
-
 
 def WSF_config(BIM):
     """
@@ -273,13 +271,13 @@ def WSF_config(BIM):
 
     # building configuration tag
     bldg_config = f"WSF" \
-                  f"{int(min(BIM['stories'],2))}_" \
+                  f"{int(min(BIM['NumberOfStories'],2))}_" \
                   f"{BIM['RoofShape']}_" \
                   f"{int(SWR)}_" \
                   f"{RDA}_" \
                   f"{RWC}_" \
                   f"{garage}_" \
                   f"{int(shutters)}_" \
-                  f"{int(BIM['terrain'])}"
+                  f"{int(BIM['TerrainRoughness'])}"
     return bldg_config
 
