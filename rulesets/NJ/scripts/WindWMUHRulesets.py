@@ -246,7 +246,7 @@ def WMUH_config(BIM):
 
     # Stories
     # Buildings with more than 3 stories are mapped to the 3-story configuration
-    stories = min(BIM['stories'], 3)
+    stories = min(BIM['NumberOfStories'], 3)
 
     # extend the BIM dictionary
     BIM.update(dict(
