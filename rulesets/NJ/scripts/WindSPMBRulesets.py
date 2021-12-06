@@ -120,6 +120,6 @@ def SPMB_config(BIM):
                   f"{roof_quality}_" \
                   f"{int(shutters)}_" \
                   f"{MRDA}_" \
-                  f"{int(BIM['terrain'])}"
+                  f"{int(BIM['TerrainRoughness'])}"
     return bldg_config
 

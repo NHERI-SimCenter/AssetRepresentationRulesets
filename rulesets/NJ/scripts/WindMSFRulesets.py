@@ -192,7 +192,7 @@ def MSF_config(BIM):
                       f"{garage}_" \
                       f"{int(shutters)}_" \
                       f"{int(MR)}_" \
-                      f"{int(BIM['terrain'])}"
+                      f"{int(BIM['TerrainRoughness'])}"
         return bldg_config
 
     else:
@@ -246,5 +246,5 @@ def MSF_config(BIM):
                       f"{garage}_" \
                       f"{int(shutters)}_" \
                       f"{int(MR)}_" \
-                      f"{int(BIM['terrain'])}"
+                      f"{int(BIM['TerrainRoughness'])}"
         return bldg_config
