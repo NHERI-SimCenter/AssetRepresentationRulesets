@@ -150,7 +150,7 @@ def building_class(BIM, hazard):
                 # OccupancyClass = RES3X or COM8
                 # Masonry Multi-Unit Hotel/Motel (MMUH1, MMUH2, or MMUH3)
                 bldg_class = 'MMUH'
-            elif ((BIM['stories'] == 1) and
+            elif ((BIM['NumberOfStories'] == 1) and
                     (BIM['OccupancyClass'] in ['COM1', 'COM2'])):
                 # BuildingType = 3004
                 # Low-Rise Masonry Strip Mall (MLRM1 or MLRM2)
