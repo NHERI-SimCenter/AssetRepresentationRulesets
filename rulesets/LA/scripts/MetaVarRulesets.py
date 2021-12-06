@@ -43,40 +43,41 @@
 # Meredith Lockhead
 # Tracy Kijewski-Correa
 
-import random
 import numpy as np
-import datetime
-import math
 
 def parse_BIM(BIM_in, location, hazards):
     """
     Parses the information provided in the BIM model.
 
-    The parameters below list the expected inputs
+    The atrributes below list the expected metadata in the BIM file
 
     Parameters
     ----------
-    stories: str
+    location: str
+        Supported locations:
+        NJ - New Jersey
+        LA - Louisiana
+    hazard: list of str
+        Supported hazard types: "wind", "inundation"
+
+    BIM attributes
+    --------------
+    NumberOfStories: str
         Number of stories
-    yearBuilt: str
+    YearBuilt: str
         Year of construction.
-    roofType: {'hip', 'hipped', 'gabled', 'gable', 'flat'}
+    RoofShape: {'hip', 'hipped', 'gabled', 'gable', 'flat'}
         One of the listed roof shapes that best describes the building.
-    occupancy: str
+    OccupancyType: str
         Occupancy type.
-    buildingDescription: str
-        MODIV code that provides additional details about the building
-    structType: {'Stucco', 'Frame', 'Stone', 'Brick'}
-        One of the listed structure types that best describes the building.
-    V_design: string
-        Ultimate Design Wind Speed was introduced in the 2012 IBC. Officially
-        called “Ultimate Design Wind Speed (Vult); equivalent to the design
-        wind speeds taken from hazard maps in ASCE 7 or ATC's API. Unit is
-        assumed to be mph.
-    area: float
+    BuildingType: str
+        Core construction material type
+    DWSII: float
+        Design wind speed II as per ASCE 7 in mph
+    Area: float
         Plan area in ft2.
-    z0: string
-        Roughness length that characterizes the surroundings.
+    LULC: integer
+        Land Use/Land Cover category (typically location-specific)
 
     Returns
     -------
@@ -97,7 +98,6 @@ def parse_BIM(BIM_in, location, hazards):
     BIM = {}
 
     if 'wind' in hazards:
-
         # maps roof type to the internal representation
         ap_RoofType = {
             'hip'   : 'hip',
@@ -109,18 +109,15 @@ def parse_BIM(BIM_in, location, hazards):
             'flat'  : 'flt',
             'Flat'  : 'flt'
         }
+
         # maps roof system to the internal representation
-        ap_RoofSyste = {
+        ap_RoofSystem = {
             'Wood': 'trs',
             'OWSJ': 'ows',
             'N/A': 'trs'
         }
-        roof_system = BIM_in.get('RoofSystem','Wood')
-        try:
-            if np.isnan(roof_system):
-                roof_system = 'Wood'
-        except:
-            pass
+        roof_system = BIM_in.get('RoofSystem', 'Wood')
+
         # maps number of units to the internal representation
         ap_NoUnits = {
             'Single': 'sgl',
@@ -128,20 +125,6 @@ def parse_BIM(BIM_in, location, hazards):
             'Multi': 'mlt',
             'nav': 'nav'
         }
-        
-        # maps for design level (Marginal Engineered is mapped to Engineered as default)
-        ap_DesignLevel = {
-            'E': 'E',
-            'NE': 'NE',
-            'PE': 'PE',
-            'ME': 'E'
-        }
-        design_level = BIM_in.get('DesignLevel','E')
-        try:
-            if np.isnan(design_level):
-                design_level = 'E'
-        except:
-            pass
 
         # Average January Temp.
         ap_ajt = {
@@ -150,41 +133,38 @@ def parse_BIM(BIM_in, location, hazards):
         }
 
         # Year built
-        alname_yearbuilt = ['yearBuilt', 'YearBuiltMODIV', 'YearBuilt']
+        alname_yearbuilt = ['yearBuilt', 'YearBuiltMODIV', 'YearBuiltNJDEP']
         yearbuilt = 1985
-        try:
-            yearbuilt = BIM_in['YearBuiltNJDEP']
-        except:
-            for i in alname_yearbuilt:
-                if i in BIM_in.keys():
-                    yearbuilt = BIM_in[i]
-                    break
-        print('yearbuilt = ', yearbuilt)
 
+        yearbuilt = BIM_in.get('YearBuilt', None)
+        if yearbuilt is None:
+            for alname in alname_yearbuilt:
+                if alname in BIM_in.keys():
+                    yearbuilt = BIM_in[alname]
+                    break
 
         # Number of Stories
         alname_nstories = ['stories', 'NumberofStories0', 'NumberofStories', 'NumberOfStories']
-        try:
-            nstories = BIM_in['NumberofStories1']
-        except:
-            for i in alname_nstories:
-                if i in BIM_in.keys():
-                    nstories = BIM_in[i]
+
+        nstories = BIM_in.get('NumberofStories1', None)
+        if nstories is None:
+            for alname in alname_nstories:
+                if alname in BIM_in.keys():
+                    nstories = BIM_in[alname]
                     break
-        print('nstories = ', nstories)
 
         # Plan Area
         alname_area = ['area', 'PlanArea1', 'Area', 'PlanArea']
-        try:
-            area = BIM_in['PlanArea0']
-        except:
-            for i in alname_area:
-                if i in BIM_in.keys():
-                    area = BIM_in[i]
+
+        area = BIM_in.get('PlanArea0', None)
+        if area is None:
+            for alname in alname_area:
+                if alname in BIM_in.keys():
+                    area = BIM_in[alname]
                     break
 
         # Design Wind Speed
-        alname_dws = ['DSWII', 'DWSII', 'DesignWindSpeed']
+        alname_dws = ['DWSII', 'DesignWindSpeed']
 
         dws = BIM_in.get('DWSII', None)
         if dws is None:
@@ -193,50 +173,18 @@ def parse_BIM(BIM_in, location, hazards):
                     dws = BIM_in[alname]
                     break
 
-        # if getting RES3 then converting it to default RES3A
-        alname_occupancy = ['OccupancyClass']
-        try:
-            oc = BIM_in['occupancy']
-            if math.isnan(oc):
-                for i in alname_occupancy:
-                    if i in BIM_in.keys():
-                        oc = BIM_in[i]
-                        break
-        except:
-            for i in alname_occupancy:
-                if i in BIM_in.keys():
-                    oc = BIM_in[i]
+        # occupancy type
+        alname_occupancy = ['occupancy', 'OccupancyClass']
+
+        oc = BIM_in.get('OccupancyClass', None)
+        if oc is None:
+            for alname in alname_occupancy:
+                if alname in BIM_in.keys():
+                    oc = BIM_in[alname]
                     break
+        # if getting RES3 then converting it to default RES3A
         if oc == 'RES3':
             oc = 'RES3A'
-
-        # maps for flood zone
-        ap_FloodZone = {
-            # Coastal areas with a 1% or greater chance of flooding and an
-            # additional hazard associated with storm waves.
-            6101: 'VE',
-            6102: 'VE',
-            6103: 'AE',
-            6104: 'AE',
-            6105: 'AO',
-            6106: 'AE',
-            6107: 'AH',
-            6108: 'AO',
-            6109: 'A',
-            6110: 'X',
-            6111: 'X',
-            6112: 'X',
-            6113: 'OW',
-            6114: 'D',
-            6115: 'NA',
-            6119: 'NA'
-        }
-        if type(BIM_in['FloodZone']) == int:
-            # NJDEP code for flood zone (conversion to the FEMA designations)
-            floodzone_fema = ap_FloodZone[BIM_in['FloodZone']]
-        else:
-            # standard input should follow the FEMA flood zone designations
-            floodzone_fema = BIM_in['FloodZone']
 
         # maps for BuildingType
         ap_BuildingType_NJ = {
@@ -264,31 +212,29 @@ def parse_BIM(BIM_in, location, hazards):
         }
         design_level = BIM_in.get('DesignLevel','E')
 
-        # first, pull in the provided data
-        BIM = dict(
+        # flood zone
+        flood_zone = BIM_in.get('FloodZone', 'X')
+
+        # add the parsed data to the BIM dict
+        BIM.update(dict(
             OccupancyClass=str(oc),
             BuildingType=buildingtype,
             YearBuilt=int(yearbuilt),
-            # double check with Tracey for format - (NumberStories0 is 4-digit code)
-            # (NumberStories1 is image-processed story number)
             NumberOfStories=int(nstories),
             PlanArea=float(area),
-            FloodZone=floodzone_fema,
             V_ult=float(dws),
             AvgJanTemp=ap_ajt[BIM_in.get('AvgJanTemp','Below')],
             RoofShape=ap_RoofType[BIM_in['RoofShape']],
             RoofSlope=float(BIM_in.get('RoofSlope',0.25)), # default 0.25
             SheathingThickness=float(BIM_in.get('SheathingThick',1.0)), # default 1.0
-            RoofSystem=str(ap_RoofSyste[roof_system]), # only valid for masonry structures
+            RoofSystem=str(ap_RoofSystem[roof_system]), # only valid for masonry structures
             Garage=float(BIM_in.get('Garage',-1.0)),
             LULC=BIM_in.get('LULC',-1),
-            z0 = float(BIM_in.get('z0',-1)), # if the z0 is already in the input file
-            Terrain = BIM_in.get('Terrain',-1),
             MeanRoofHt=float(BIM_in.get('MeanRoofHt',15.0)), # default 15
-            DesignLevel=str(ap_DesignLevel[design_level]), # default engineered
             WindowArea=float(BIM_in.get('WindowArea',0.20)),
-            WoodZone=str(BIM_in.get('WindZone', 'I'))
-        )
+            WindZone=str(BIM_in.get('WindZone', 'I')),
+            FloodZone =str(flood_zone)
+        ))
 
     if 'inundation' in hazards:
 
@@ -298,13 +244,11 @@ def parse_BIM(BIM_in, location, hazards):
             'YES': 1
         }
 
+        # foundation type
         foundation = BIM_in.get('FoundationType',3501)
-        if np.isnan(foundation):
-            foundation = 3501
 
+        # number of units
         nunits = BIM_in.get('NoUnits',1)
-        if np.isnan(nunits):
-            nunits = 1
 
         # maps for flood zone
         ap_FloodZone = {
@@ -341,8 +285,7 @@ def parse_BIM(BIM_in, location, hazards):
             FirstFloorElevation=float(BIM_in.get('FirstFloorHt1',10.0)),
             SplitLevel=bool(ap_SplitLevel[BIM_in.get('SplitLevel','NO')]), # dfault: no
             FoundationType=int(foundation), # default: pile
-            City=BIM_in.get('City','NA'),
-            FloodZone =str(floodzone_fema)
+            City=BIM_in.get('City','NA')
         ))
 
     # add inferred, generic meta-variables
@@ -410,9 +353,7 @@ def parse_BIM(BIM_in, location, hazards):
         # Emergent Herbaceous Wetlands (6240) with zo=0.03 assume Open
         # Note: HAZUS category of trees (1.00) does not apply to any LU/LC in NJ
         terrain = 15 # Default in Reorganized Rulesets - WIND
-        if (BIM['z0'] > 0):
-            terrain = int(100 * BIM['z0'])
-        elif (BIM['LULC'] > 0):
+        if location == "NJ":
             if (BIM['FloodZone'].startswith('V') or BIM['FloodZone'] in ['A', 'AE', 'A1-30', 'AR', 'A99']):
                 terrain = 3
             elif ((BIM['LULC'] >= 5000) and (BIM['LULC'] <= 5999)):
@@ -425,18 +366,18 @@ def parse_BIM(BIM_in, location, hazards):
                 terrain = 35 # Suburban
             elif ((BIM['LULC'] >= 4100) and (BIM['LULC'] <= 4300)) or (BIM['LULC'] == 1600):
                 terrain = 70 # light trees
-        elif (BIM['Terrain'] > 0):
+        elif location == "LA":
             if (BIM['FloodZone'].startswith('V') or BIM['FloodZone'] in ['A', 'AE', 'A1-30', 'AR', 'A99']):
                 terrain = 3
-            elif ((BIM['Terrain'] >= 50) and (BIM['Terrain'] <= 59)):
+            elif ((BIM['LULC'] >= 50) and (BIM['LULC'] <= 59)):
                 terrain = 3 # Open
-            elif ((BIM['Terrain'] == 44) or (BIM['Terrain'] == 62)) or (BIM['Terrain'] == 76):
+            elif ((BIM['LULC'] == 44) or (BIM['LULC'] == 62)) or (BIM['LULC'] == 76):
                 terrain = 3 # Open
-            elif ((BIM['Terrain'] >= 20) and (BIM['Terrain'] <= 29)):
+            elif ((BIM['LULC'] >= 20) and (BIM['LULC'] <= 29)):
                 terrain = 15 # Light suburban
-            elif (BIM['Terrain'] == 11) or (BIM['Terrain'] == 61):
+            elif (BIM['LULC'] == 11) or (BIM['LULC'] == 61):
                 terrain = 35 # Suburban
-            elif ((BIM['Terrain'] >= 41) and (BIM['Terrain'] <= 43)) or (BIM['Terrain'] in [16, 17]):
+            elif ((BIM['LULC'] >= 41) and (BIM['LULC'] <= 43)) or (BIM['LULC'] in [16, 17]):
                 terrain = 70 # light trees
 
         BIM.update(dict(

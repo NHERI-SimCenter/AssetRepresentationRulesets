@@ -63,7 +63,7 @@ def MLRI_config(BIM):
         class.
     """
 
-    year = BIM['year_built'] # just for the sake of brevity
+    year = BIM['YearBuilt'] # just for the sake of brevity
 
     # MR
     MR = True
@@ -83,29 +83,38 @@ def MLRI_config(BIM):
     else:
         MRDA = 'sup'  # superior
 
-    if BIM['roof_shape'] in ['gab', 'hip']:
+    if BIM['RoofShape'] in ['gab', 'hip']:
         roof_cover = 'nav'
         roof_quality = 'god' # default supported by HAZUS
     else:
         if year >= 1975:
             roof_cover = 'spm'
-            if BIM['year_built'] >= (datetime.datetime.now().year - 35):
+            if BIM['YearBuilt'] >= (datetime.datetime.now().year - 35):
                 roof_quality = 'god'
             else:
                 roof_quality = 'por'
         else:
             # year < 1975
             roof_cover = 'bur'
-            if BIM['year_built'] >= (datetime.datetime.now().year - 30):
+            if BIM['YearBuilt'] >= (datetime.datetime.now().year - 30):
                 roof_quality = 'god'
             else:
                 roof_quality = 'por'
+    
+    # extend the BIM dictionary
+    BIM.update(dict(
+        RoofCover = roof_cover,
+        RoofQuality = roof_quality,
+        RoofDeckAttachmentM = MRDA,
+        Shutters = shutters,
+        MasonryReinforcing = MR,
+        ))
 
     bldg_config = f"MLRI_" \
                   f"{roof_quality}_" \
                   f"{int(shutters)}_" \
                   f"{int(MR)}_" \
                   f"{MRDA}_" \
-                  f"{int(BIM['terrain'])}"
+                  f"{int(BIM['TerrainRoughness'])}"
     return bldg_config
 
