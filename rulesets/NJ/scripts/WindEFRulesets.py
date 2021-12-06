@@ -64,7 +64,7 @@ def HUEFFS_config(BIM):
         class.
     """
 
-    year = BIM['year_built']  # just for the sake of brevity
+    year = BIM['YearBuilt']  # just for the sake of brevity
 
     # Roof cover
     if year >= 1975:
@@ -91,13 +91,21 @@ def HUEFFS_config(BIM):
     else:
         MRDA = 'std'  # standard
 
+    # extend the BIM dictionary
+    BIM.update(dict(
+        RoofCover = roof_cover,
+        RoofDeckAttachmentM = MRDA,
+        RoofDeckAge=DQ,
+        WindDebrisClass = WIDD
+        ))
+
     bldg_tag = 'HUEFFS'
     bldg_config = f"{bldg_tag}_" \
                   f"{roof_cover}_" \
                   f"{WIDD}_" \
                   f"{DQ}_" \
                   f"{MRDA}_" \
-                  f"{int(BIM['terrain'])}"
+                  f"{int(BIM['TerrainRoughness'])}"
     return bldg_config
 
 def HUEFSS_config(BIM):
@@ -116,7 +124,7 @@ def HUEFSS_config(BIM):
         class.
     """
 
-    year = BIM['year_built']  # just for the sake of brevity
+    year = BIM['YearBuilt']  # just for the sake of brevity
 
     # Roof cover
     if year >= 1975:
@@ -144,7 +152,16 @@ def HUEFSS_config(BIM):
         MRDA = 'std'  # standard
 
     # Shutters
-    shutters = BIM['WBD']
+    shutters = BIM['WindBorneDebris']
+
+    # extend the BIM dictionary
+    BIM.update(dict(
+        RoofCover = roof_cover,
+        RoofDeckAttachmentM = MRDA,
+        RoofDeckAge=DQ,
+        WindDebrisClass = WIDD,
+        Shutters=shutters
+        ))
 
     bldg_tag = 'HUEFSS'
     bldg_config = f"{bldg_tag}_" \
@@ -153,7 +170,7 @@ def HUEFSS_config(BIM):
                   f"{DQ}_" \
                   f"{MRDA}_" \
                   f"{int(shutters)}_" \
-                  f"{int(BIM['terrain'])}"
+                  f"{int(BIM['TerrainRoughness'])}"
     return bldg_config
 
 
@@ -173,7 +190,7 @@ def HUEFH_config(BIM):
         class.
     """
 
-    year = BIM['year_built']  # just for the sake of brevity
+    year = BIM['YearBuilt']  # just for the sake of brevity
 
     # Roof cover
     if year >= 1975:
@@ -186,7 +203,7 @@ def HUEFH_config(BIM):
     WIDD = 'A'
 
     # Shutters
-    shutters = BIM['WBD']
+    shutters = BIM['WindBorneDebris']
 
     # Metal-RDA
     if year > 2000:
@@ -197,19 +214,27 @@ def HUEFH_config(BIM):
     else:
         MRDA = 'std'  # standard
 
-    if BIM['stories'] <=2:
+    if BIM['NumberOfStories'] <=2:
         bldg_tag = 'HUEFHS'
-    elif BIM['stories'] <= 5:
+    elif BIM['NumberOfStories'] <= 5:
         bldg_tag = 'HUEFHM'
     else:
         bldg_tag = 'HUEFHL'
+
+    # extend the BIM dictionary
+    BIM.update(dict(
+        RoofCover = roof_cover,
+        RoofDeckAttachmentM = MRDA,
+        WindDebrisClass = WIDD,
+        Shutters=shutters
+        ))
 
     bldg_config = f"{bldg_tag}_" \
                   f"{roof_cover}_" \
                   f"{WIDD}_" \
                   f"{MRDA}_" \
                   f"{int(shutters)}_" \
-                  f"{int(BIM['terrain'])}"
+                  f"{int(BIM['TerrainRoughness'])}"
     return bldg_config
 
 def HUEFS_config(BIM):
@@ -228,7 +253,7 @@ def HUEFS_config(BIM):
         class.
     """
 
-    year = BIM['year_built']  # just for the sake of brevity
+    year = BIM['YearBuilt']  # just for the sake of brevity
 
     # Roof cover
     if year >= 1975:
@@ -242,10 +267,10 @@ def HUEFS_config(BIM):
 
     # Shutters
     if year > 2000:
-        shutters = BIM['WBD']
+        shutters = BIM['WindBorneDebris']
     else:
         # year <= 2000
-        if BIM['WBD']:
+        if BIM['WindBorneDebris']:
             shutters = random.random() < 0.46
         else:
             shutters = False
@@ -259,15 +284,23 @@ def HUEFS_config(BIM):
     else:
         MRDA = 'std'  # standard
 
-    if BIM['stories'] <=2:
+    if BIM['NumberOfStories'] <=2:
         bldg_tag = 'HUEFSM'
     else:
         bldg_tag = 'HUEFSL'
+
+    # extend the BIM dictionary
+    BIM.update(dict(
+        RoofCover = roof_cover,
+        RoofDeckAttachmentM = MRDA,
+        WindDebrisClass = WIDD,
+        Shutters=shutters
+        ))
         
     bldg_config = f"{bldg_tag}_" \
                   f"{roof_cover}_" \
                   f"{WIDD}_" \
                   f"{MRDA}_" \
                   f"{int(shutters)}_" \
-                  f"{int(BIM['terrain'])}"
+                  f"{int(BIM['TerrainRoughness'])}"
     return bldg_config
