@@ -44,16 +44,10 @@
 # Meredith Lockhead
 # Tracy Kijewski-Correa
 
-import random
-import numpy as np
-import datetime
-import math
-
 from WindMetaVarRulesets import *
-from WindClassRulesets import *
+from BuildingClassRulesets import *
 from FloodAssmRulesets import *
 from FloodClassRulesets import *
-from FloodRulesets import *
 from WindCECBRulesets import *
 from WindCERBRulesets import *
 from WindEFRulesets import *
@@ -96,10 +90,10 @@ def auto_populate(BIM):
     """
 
     # parse the BIM data
-    BIM_ap = parse_BIM(BIM)
+    BIM_ap = parse_BIM(BIM, location="NJ", hazards=['wind','inundation'])
 
     # identify the building class
-    bldg_class = building_class(BIM_ap)
+    bldg_class = building_class(BIM_ap, hazard='wind')
 
     # prepare the building configuration string
     if bldg_class == 'WSF':
