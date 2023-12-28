@@ -81,7 +81,7 @@ def parse_BIM(BIM_in, location, hazards):
 
     Returns
     -------
-    GI_ap: dictionary
+    BIM_ap: dictionary
         Parsed building characteristics.
     """
 
@@ -353,12 +353,12 @@ def parse_BIM(BIM_in, location, hazards):
         # Areas vulnerable to hurricane, defined as the U.S. Atlantic Ocean and
         # Gulf of Mexico coasts where the ultimate design wind speed, V_ult is
         # greater than a pre-defined limit.
-        if BIM['YearBuilt'] >= 2016:
+        if BIM_ap['YearBuilt'] >= 2016:
             # The limit is 115 mph in IRC 2015
-            HPR = BIM['V_ult'] > 115.0
+            HPR = BIM_ap['V_ult'] > 115.0
         else:
             # The limit is 90 mph in IRC 2009 and earlier versions
-            HPR = BIM['V_ult'] > 90.0
+            HPR = BIM_ap['V_ult'] > 90.0
 
         # Wind Borne Debris
         # Areas within hurricane-prone regions are affected by debris if one of
@@ -368,7 +368,7 @@ def parse_BIM(BIM_in, location, hazards):
         # (2) In areas where the ultimate design wind speed is greater than
         # general_lim
         # The flood_lim and general_lim limits depend on the year of construction
-        if BIM['YearBuilt'] >= 2016:
+        if BIM_ap['YearBuilt'] >= 2016:
             # In IRC 2015:
             flood_lim = 130.0 # mph
             general_lim = 140.0 # mph
@@ -385,8 +385,8 @@ def parse_BIM(BIM_in, location, hazards):
         if not HPR:
             WBD = False
         else:
-            WBD = (((BIM['FloodZone'].startswith('A') or BIM['FloodZone'].startswith('V')) and
-                    BIM['V_ult'] >= flood_lim) or (BIM['V_ult'] >= general_lim))
+            WBD = (((BIM_ap['FloodZone'].startswith('A') or BIM_ap['FloodZone'].startswith('V')) and
+                    BIM_ap['V_ult'] >= flood_lim) or (BIM_ap['V_ult'] >= general_lim))
 
         # Terrain
         # open (0.03) = 3
@@ -410,40 +410,42 @@ def parse_BIM(BIM_in, location, hazards):
         # Emergent Herbaceous Wetlands (6240) with zo=0.03 assume Open
         # Note: HAZUS category of trees (1.00) does not apply to any LU/LC in NJ
         terrain = 15 # Default in Reorganized Rulesets - WIND
-        if (BIM['z0'] > 0):
-            terrain = int(100 * BIM['z0'])
-        elif (BIM['LULC'] > 0):
-            if (BIM['FloodZone'].startswith('V') or BIM['FloodZone'] in ['A', 'AE', 'A1-30', 'AR', 'A99']):
+        LULC = BIM_ap['LULC']
+        TER = BIM_ap['Terrain']
+        if (BIM_ap['z0'] > 0):
+            terrain = int(100 * BIM_ap['z0'])
+        elif (LULC > 0):
+            if (BIM_ap['FloodZone'].startswith('V') or BIM_ap['FloodZone'] in ['A', 'AE', 'A1-30', 'AR', 'A99']):
                 terrain = 3
-            elif ((BIM['LULC'] >= 5000) and (BIM['LULC'] <= 5999)):
+            elif ((LULC >= 5000) and (LULC <= 5999)):
                 terrain = 3 # Open
-            elif ((BIM['LULC'] == 4400) or (BIM['LULC'] == 6240)) or (BIM['LULC'] == 7600):
+            elif ((LULC == 4400) or (LULC == 6240)) or (LULC == 7600):
                 terrain = 3 # Open
-            elif ((BIM['LULC'] >= 2000) and (BIM['LULC'] <= 2999)):
+            elif ((LULC >= 2000) and (LULC <= 2999)):
                 terrain = 15 # Light suburban
-            elif ((BIM['LULC'] >= 1110) and (BIM['LULC'] <= 1140)) or ((BIM['LULC'] >= 6250) and (BIM['LULC'] <= 6252)):
+            elif ((LULC >= 1110) and (LULC <= 1140)) or ((LULC >= 6250) and (LULC <= 6252)):
                 terrain = 35 # Suburban
-            elif ((BIM['LULC'] >= 4100) and (BIM['LULC'] <= 4300)) or (BIM['LULC'] == 1600):
+            elif ((LULC >= 4100) and (LULC <= 4300)) or (LULC == 1600):
                 terrain = 70 # light trees
-        elif (BIM['Terrain'] > 0):
-            if (BIM['FloodZone'].startswith('V') or BIM['FloodZone'] in ['A', 'AE', 'A1-30', 'AR', 'A99']):
+        elif (TER > 0):
+            if (BIM_ap['FloodZone'].startswith('V') or BIM_ap['FloodZone'] in ['A', 'AE', 'A1-30', 'AR', 'A99']):
                 terrain = 3
-            elif ((BIM['Terrain'] >= 50) and (BIM['Terrain'] <= 59)):
+            elif ((TER >= 50) and (TER <= 59)):
                 terrain = 3 # Open
-            elif ((BIM['Terrain'] == 44) or (BIM['Terrain'] == 62)) or (BIM['Terrain'] == 76):
+            elif ((TER == 44) or (TER == 62)) or (TER == 76):
                 terrain = 3 # Open
-            elif ((BIM['Terrain'] >= 20) and (BIM['Terrain'] <= 29)):
+            elif ((TER >= 20) and (TER <= 29)):
                 terrain = 15 # Light suburban
-            elif (BIM['Terrain'] == 11) or (BIM['Terrain'] == 61):
+            elif (TER == 11) or (TER == 61):
                 terrain = 35 # Suburban
-            elif ((BIM['Terrain'] >= 41) and (BIM['Terrain'] <= 43)) or (BIM['Terrain'] in [16, 17]):
+            elif ((TER >= 41) and (TER <= 43)) or (TER in [16, 17]):
                 terrain = 70 # light trees
 
         BIM_ap.update(dict(
             # Nominal Design Wind Speed
             # Former term was “Basic Wind Speed”; it is now the “Nominal Design
             # Wind Speed (V_asd). Unit: mph."
-            V_asd = np.sqrt(0.6 * BIM['V_ult']),
+            V_asd = np.sqrt(0.6 * BIM_ap['V_ult']),
 
             HazardProneRegion=HPR,
             WindBorneDebris=WBD,
