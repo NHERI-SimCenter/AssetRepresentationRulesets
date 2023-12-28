@@ -45,12 +45,13 @@
 
 import random
 import numpy as np
+import pandas as pd
 import datetime
 import math
 
-def parse_BIM(BIM_in):
+def parse_GI(GI_in):
     """
-    Parses the information provided in the BIM model.
+    Parses the information provided in the AIM model.
 
     The parameters below list the expected inputs
 
@@ -80,7 +81,7 @@ def parse_BIM(BIM_in):
 
     Returns
     -------
-    BIM: dictionary
+    GI_ap: dictionary
         Parsed building characteristics.
     """
 
@@ -228,12 +229,12 @@ def parse_BIM(BIM_in):
         6115: 'NA',
         6119: 'NA'
     }
-    if type(BIM_in['FloodZone']) == int:
+    if type(GI_in['FloodZone']) == int:
         # NJDEP code for flood zone (conversion to the FEMA designations)
-        floodzone_fema = ap_FloodZone[BIM_in['FloodZone']]
+        floodzone_fema = ap_FloodZone[GI_in['FloodZone']]
     else:
         # standard input should follow the FEMA flood zone designations
-        floodzone_fema = BIM_in['FloodZone']
+        floodzone_fema = GI_in['FloodZone']
 
     # maps for BuildingType
     ap_BuildingType = {
@@ -245,15 +246,20 @@ def parse_BIM(BIM_in):
         'Masonry': 3004,
         'Manufactured': 3005
     }
-    if type(BIM_in['FloodZone']) == str:
+    if type(GI_in['FloodZone']) == str:
         # NJDEP code for flood zone (conversion to the FEMA designations)
-        buildingtype = ap_BuildingType[BIM_in['BuildingType']]
+        buildingtype = ap_BuildingType[GI_in['BuildingType']]
     else:
         # standard input should follow the FEMA flood zone designations
-        buildingtype = BIM_in['BuildingType']
+        buildingtype = GI_in['BuildingType']
 
     # first, pull in the provided data
-    BIM = dict(
+    GI_ap = GI_in.copy()
+    GI_ap.update(dict(
+        OccupancyClass=str(oc),
+        YearBuilt=int(yearbuilt),
+        NumberOfStories=int(nstories),
+        PlanArea=float(area),
         occupancy_class=str(oc),
         bldg_type=int(buildingtype),
         year_built=int(yearbuilt),
@@ -262,26 +268,26 @@ def parse_BIM(BIM_in):
         stories=int(nstories),
         area=float(area),
         flood_zone=floodzone_fema,
-        V_ult=float(BIM_in['DSWII']),
-        avg_jan_temp=ap_ajt[BIM_in.get('AvgJanTemp','Below')],
-        roof_shape=ap_RoofType[BIM_in['RoofShape']],
-        roof_slope=float(BIM_in.get('RoofSlope',0.25)), # default 0.25
-        sheathing_t=float(BIM_in.get('SheathingThick',1.0)), # default 1.0
+        V_ult=float(GI_in['DSWII']),
+        avg_jan_temp=ap_ajt[GI_in.get('AvgJanTemp','Below')],
+        roof_shape=ap_RoofType[GI_in['RoofShape']],
+        roof_slope=float(GI_in.get('RoofSlope',0.25)), # default 0.25
+        sheathing_t=float(GI_in.get('SheathingThick',1.0)), # default 1.0
         roof_system=str(ap_RoofSyste[roof_system]), # only valid for masonry structures
-        garage_tag=float(BIM_in.get('Garage',-1.0)),
-        lulc=BIM_in.get('LULC',-1),
-        z0 = float(BIM_in.get('z0',-1)), # if the z0 is already in the input file
-        Terrain = BIM_in.get('Terrain',-1),
-        mean_roof_height=float(BIM_in.get('MeanRoofHt',15.0)), # default 15
+        garage_tag=float(GI_in.get('Garage',-1.0)),
+        lulc=GI_in.get('LULC',-1),
+        z0 = float(GI_in.get('z0',-1)), # if the z0 is already in the input file
+        Terrain = GI_in.get('Terrain',-1),
+        mean_roof_height=float(GI_in.get('MeanRoofHt',15.0)), # default 15
         design_level=str(ap_DesignLevel[design_level]), # default engineered
         no_units=int(nunits),
-        window_area=float(BIM_in.get('WindowArea',0.20)),
-        first_floor_ht1=float(BIM_in.get('FirstFloorHt1',10.0)),
-        split_level=bool(ap_SplitLevel[BIM_in.get('SplitLevel','NO')]), # dfault: no
+        window_area=float(GI_in.get('WindowArea',0.20)),
+        first_floor_ht1=float(GI_in.get('FirstFloorHt1',10.0)),
+        split_level=bool(ap_SplitLevel[GI_in.get('SplitLevel','NO')]), # dfault: no
         fdtn_type=int(foundation), # default: pile
-        city=BIM_in.get('City','NA'),
-        wind_zone=str(BIM_in.get('WindZone', 'I'))
-    )
+        city=GI_in.get('City','NA'),
+        wind_zone=str(GI_in.get('WindZone', 'I'))
+    ))
 
     # add inferred, generic meta-variables
 
@@ -289,12 +295,12 @@ def parse_BIM(BIM_in):
     # Areas vulnerable to hurricane, defined as the U.S. Atlantic Ocean and
     # Gulf of Mexico coasts where the ultimate design wind speed, V_ult is
     # greater than a pre-defined limit.
-    if BIM['year_built'] >= 2016:
+    if GI_ap['year_built'] >= 2016:
         # The limit is 115 mph in IRC 2015
-        HPR = BIM['V_ult'] > 115.0
+        HPR = GI_ap['V_ult'] > 115.0
     else:
         # The limit is 90 mph in IRC 2009 and earlier versions
-        HPR = BIM['V_ult'] > 90.0
+        HPR = GI_ap['V_ult'] > 90.0
 
     # Wind Borne Debris
     # Areas within hurricane-prone regions are affected by debris if one of
@@ -304,7 +310,7 @@ def parse_BIM(BIM_in):
     # (2) In areas where the ultimate design wind speed is greater than
     # general_lim
     # The flood_lim and general_lim limits depend on the year of construction
-    if BIM['year_built'] >= 2016:
+    if GI_ap['year_built'] >= 2016:
         # In IRC 2015:
         flood_lim = 130.0 # mph
         general_lim = 140.0 # mph
@@ -321,8 +327,8 @@ def parse_BIM(BIM_in):
     if not HPR:
         WBD = False
     else:
-        WBD = (((BIM['flood_zone'].startswith('A') or BIM['flood_zone'].startswith('V')) and
-                BIM['V_ult'] >= flood_lim) or (BIM['V_ult'] >= general_lim))
+        WBD = (((GI_ap['flood_zone'].startswith('A') or GI_ap['flood_zone'].startswith('V')) and
+                GI_ap['V_ult'] >= flood_lim) or (GI_ap['V_ult'] >= general_lim))
 
     # Terrain
     # open (0.03) = 3
@@ -346,40 +352,42 @@ def parse_BIM(BIM_in):
     # Emergent Herbaceous Wetlands (6240) with zo=0.03 assume Open
     # Note: HAZUS category of trees (1.00) does not apply to any LU/LC in NJ
     terrain = 15 # Default in Reorganized Rulesets - WIND
-    if (BIM['z0'] > 0):
-        terrain = int(100 * BIM['z0'])
-    elif (BIM['lulc'] > 0):
-        if (BIM['flood_zone'].startswith('V') or BIM['flood_zone'] in ['A', 'AE', 'A1-30', 'AR', 'A99']):
+    AIM_LULC = GI_ap['lulc']
+    AIM_terrain = GI_ap['Terrain']
+    if (GI_ap['z0'] > 0):
+        terrain = int(100 * GI_ap['z0'])
+    elif (AIM_LULC > 0):
+        if (GI_ap['flood_zone'].startswith('V') or GI_ap['flood_zone'] in ['A', 'AE', 'A1-30', 'AR', 'A99']):
             terrain = 3
-        elif ((BIM['lulc'] >= 5000) and (BIM['lulc'] <= 5999)):
+        elif ((AIM_LULC >= 5000) and (AIM_LULC <= 5999)):
             terrain = 3 # Open
-        elif ((BIM['lulc'] == 4400) or (BIM['lulc'] == 6240)) or (BIM['lulc'] == 7600):
+        elif ((AIM_LULC == 4400) or (AIM_LULC == 6240)) or (AIM_LULC == 7600):
             terrain = 3 # Open
-        elif ((BIM['lulc'] >= 2000) and (BIM['lulc'] <= 2999)):
+        elif ((AIM_LULC >= 2000) and (AIM_LULC <= 2999)):
             terrain = 15 # Light suburban
-        elif ((BIM['lulc'] >= 1110) and (BIM['lulc'] <= 1140)) or ((BIM['lulc'] >= 6250) and (BIM['lulc'] <= 6252)):
+        elif ((AIM_LULC >= 1110) and (AIM_LULC <= 1140)) or ((AIM_LULC >= 6250) and (AIM_LULC <= 6252)):
             terrain = 35 # Suburban
-        elif ((BIM['lulc'] >= 4100) and (BIM['lulc'] <= 4300)) or (BIM['lulc'] == 1600):
+        elif ((AIM_LULC >= 4100) and (AIM_LULC <= 4300)) or (AIM_LULC == 1600):
             terrain = 70 # light trees
-    elif (BIM['Terrain'] > 0):
-        if (BIM['flood_zone'].startswith('V') or BIM['flood_zone'] in ['A', 'AE', 'A1-30', 'AR', 'A99']):
+    elif (AIM_terrain > 0):
+        if (GI_ap['flood_zone'].startswith('V') or GI_ap['flood_zone'] in ['A', 'AE', 'A1-30', 'AR', 'A99']):
             terrain = 3
-        elif ((BIM['Terrain'] >= 50) and (BIM['Terrain'] <= 59)):
+        elif ((AIM_terrain >= 50) and (AIM_terrain <= 59)):
             terrain = 3 # Open
-        elif ((BIM['Terrain'] == 44) or (BIM['Terrain'] == 62)) or (BIM['Terrain'] == 76):
+        elif ((AIM_terrain == 44) or (AIM_terrain == 62)) or (AIM_terrain == 76):
             terrain = 3 # Open
-        elif ((BIM['Terrain'] >= 20) and (BIM['Terrain'] <= 29)):
+        elif ((AIM_terrain >= 20) and (AIM_terrain <= 29)):
             terrain = 15 # Light suburban
-        elif (BIM['Terrain'] == 11) or (BIM['Terrain'] == 61):
+        elif (AIM_terrain == 11) or (AIM_terrain == 61):
             terrain = 35 # Suburban
-        elif ((BIM['Terrain'] >= 41) and (BIM['Terrain'] <= 43)) or (BIM['Terrain'] in [16, 17]):
+        elif ((AIM_terrain >= 41) and (AIM_terrain <= 43)) or (AIM_terrain in [16, 17]):
             terrain = 70 # light trees
 
-    BIM.update(dict(
+    GI_ap.update(dict(
         # Nominal Design Wind Speed
         # Former term was “Basic Wind Speed”; it is now the “Nominal Design
         # Wind Speed (V_asd). Unit: mph."
-        V_asd = np.sqrt(0.6 * BIM['V_ult']),
+        V_asd = np.sqrt(0.6 * GI_ap['V_ult']),
 
         # Flood Risk
         # Properties in the High Water Zone (within 1 mile of the coast) are at
@@ -391,5 +399,5 @@ def parse_BIM(BIM_in):
         terrain=terrain,
     ))
 
-    return BIM
+    return GI_ap
 

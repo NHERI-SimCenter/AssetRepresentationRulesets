@@ -46,90 +46,93 @@
 
 import random
 import numpy as np
+import pandas as pd
 import datetime
 import math
 
-from WindMetaVarRulesets import *
-from WindClassRulesets import *
-from FloodAssmRulesets import *
-from FloodClassRulesets import *
-from FloodRulesets import *
-from WindCECBRulesets import *
-from WindCERBRulesets import *
-from WindEFRulesets import *
-from WindMECBRulesets import *
-from WindMERBRulesets import *
-from WindMHRulesets import *
-from WindMLRIRulesets import *
-from WindMLRMRulesets import *
-from WindMMUHRulesets import *
-from WindMSFRulesets import *
-from WindSECBRulesets import *
-from WindSERBRulesets import *
-from WindSPMBRulesets import *
-from WindWMUHRulesets import *
-from WindWSFRulesets import *
+from WindMetaVarRulesets import parse_GI
+from WindClassRulesets import building_class
+from FloodAssmRulesets import Assm_config
+from FloodClassRulesets import FL_config
+from FloodRulesets import FL_config
+from WindCECBRulesets import CECB_config
+from WindCERBRulesets import CERB_config
+from WindEFRulesets import HUEFFS_config, HUEFSS_config, HUEFH_config, HUEFS_config
+from WindMECBRulesets import MECB_config
+from WindMERBRulesets import MERB_config
+from WindMHRulesets import MH_config
+from WindMLRIRulesets import MLRI_config
+from WindMLRMRulesets import MLRM_config
+from WindMMUHRulesets import MMUH_config
+from WindMSFRulesets import MSF_config
+from WindSECBRulesets import SECB_config
+from WindSERBRulesets import SERB_config
+from WindSPMBRulesets import SPMB_config
+from WindWMUHRulesets import WMUH_config
+from WindWSFRulesets import WSF_config
 
-
-def auto_populate(BIM):
+def auto_populate(AIM):
     """
     Populates the DL model for hurricane assessments in Atlantic County, NJ
 
     Assumptions:
     - Everything relevant to auto-population is provided in the Buiding
-    Information Model (BIM).
-    - The information expected in the BIM file is described in the parse_BIM
+    Information Model (AIM).
+    - The information expected in the AIM file is described in the parse_AIM
     method.
 
     Parameters
     ----------
-    BIM_in: dictionary
+    AIM_in: dictionary
         Contains the information that is available about the asset and will be
         used to auto-popualate the damage and loss model.
 
     Returns
     -------
-    BIM_ap: dictionary
-        Containes the extended BIM data.
+    GI_ap: dictionary
+        Containes the extended AIM data.
     DL_ap: dictionary
         Contains the auto-populated loss model.
     """
 
-    # parse the BIM data
-    BIM_ap = parse_BIM(BIM)
+    # extract the General Information
+    GI = AIM.get('GeneralInformation', None)
+
+    # parse the GI data
+    GI_ap = parse_GI(GI)
 
     # identify the building class
-    bldg_class = building_class(BIM_ap)
+    bldg_class = building_class(GI_ap)
 
     # prepare the building configuration string
     if bldg_class == 'WSF':
-        bldg_config = WSF_config(BIM_ap)
+        bldg_config = WSF_config(GI_ap)
     elif bldg_class == 'WMUH':
-        bldg_config = WMUH_config(BIM_ap)
+        bldg_config = WMUH_config(GI_ap)
     elif bldg_class == 'MSF':
-        bldg_config = MSF_config(BIM_ap)
+        bldg_config = MSF_config(GI_ap)
     elif bldg_class == 'MMUH':
-        bldg_config = MMUH_config(BIM_ap)
+        bldg_config = MMUH_config(GI_ap)
     elif bldg_class == 'MLRM':
-        bldg_config = MLRM_config(BIM_ap)
+        bldg_config = MLRM_config(GI_ap)
     elif bldg_class == 'MLRI':
-        bldg_config = MLRI_config(BIM_ap)
+        bldg_config = MLRI_config(GI_ap)
     elif bldg_class == 'MERB':
-        bldg_config = MERB_config(BIM_ap)
+        bldg_config = MERB_config(GI_ap)
     elif bldg_class == 'MECB':
-        bldg_config = MECB_config(BIM_ap)
+        bldg_config = MECB_config(GI_ap)
     elif bldg_class == 'CECB':
-        bldg_config = CECB_config(BIM_ap)
+        bldg_config = CECB_config(GI_ap)
     elif bldg_class == 'CERB':
-        bldg_config = CERB_config(BIM_ap)
+        bldg_config = CERB_config(GI_ap)
     elif bldg_class == 'SPMB':
-        bldg_config = SPMB_config(BIM_ap)
+        bldg_config = SPMB_config(GI_ap)
     elif bldg_class == 'SECB':
-        bldg_config = SECB_config(BIM_ap)
+        bldg_config = SECB_config(GI_ap)
     elif bldg_class == 'SERB':
-        bldg_config = SERB_config(BIM_ap)
+        bldg_config = SERB_config(GI_ap)
     elif bldg_class == 'MH':
-        bldg_config = MH_config(BIM_ap)
+        bldg_config = MH_config(GI_ap)
     else:
         raise ValueError(
             f"Building class {bldg_class} not recognized by the "
@@ -137,10 +140,10 @@ def auto_populate(BIM):
         )
 
     # prepare the flood rulesets
-    fld_config = FL_config(BIM_ap)
+    fld_config = FL_config(GI_ap)
 
     # prepare the assembly loss compositions
-    hu_assm, fl_assm = Assm_config(BIM_ap)
+    hu_assm, fl_assm = Assm_config(GI_ap)
 
     DL_ap = {
         '_method'      : 'HAZUS MH HU',
