@@ -145,31 +145,38 @@ def auto_populate(AIM):
     # prepare the assembly loss compositions
     hu_assm, fl_assm = Assm_config(GI_ap)
 
-    DL_ap = {
-        '_method'      : 'HAZUS MH HU',
-        'LossModel'    : {
-            'DecisionVariables': {
-                "ReconstructionCost": True
-            },
-            'ReplacementCost'  : 100
-        },
-        'Components'   : {
-            bldg_config: [{
-                'location'       : '1',
-                'direction'      : '1',
-                'median_quantity': '1.0',
-                'unit'           : 'ea',
-                'distribution'   : 'N/A'
-            }],
-            fld_config: [{
-                'location'       : '1',
-                'direction'      : '1',
-                'median_quantity': '1.0',
-                'unit'           : 'ea',
-                'distribution'   : 'N/A'
-            }]
-        },
-        'Combinations' : [hu_assm, fl_assm]
-    }
+    # prepare the component assignment
+    CMP = pd.DataFrame(
+                {f'{bldg_config}': [  'ea',         1,          1,        1,   'N/A'],
+                 f'{fld_config}':  [  'ea',         1,          1,        1,   'N/A']},
+                index = [          'Units','Location','Direction','Theta_0','Family']
+            ).T
 
-    return BIM_ap, DL_ap
+    DL_ap = {
+            "Asset": {
+                "ComponentAssignmentFile": "CMP_QNT.csv",
+                "ComponentDatabase": "Hazus Hurricane",
+                "NumberOfStories": f"{GI_ap['stories']}",
+                "OccupancyType": f"{GI_ap['occupancy_class']}",
+                "PlanArea": f"{GI_ap['area']}"
+            },
+            "Damage": {
+                "DamageProcess": "Hazus Hurricane"
+            },
+            "Demands": {        
+            },
+            "Losses": {
+                "BldgRepair": {
+                    "ConsequenceDatabase": "Hazus Hurricane",
+                    "MapApproach": "Automatic",
+                    "DecisionVariables": {
+                        "Cost": True,
+                        "Carbon": False,
+                        "Energy": False,
+                        "Time": False
+                    }
+                }
+            }
+        }
+
+    return GI_ap, DL_ap, CMP

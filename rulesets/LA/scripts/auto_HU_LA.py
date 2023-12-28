@@ -101,25 +101,6 @@ def auto_populate(AIM):
         )
 
     # drop keys of internal variables from GI_ap dict
-        '_method'      : 'HAZUS MH HU',
-        'LossModel'    : {
-            'DecisionVariables': {
-                "ReconstructionCost": True
-            },
-            'ReplacementCost'  : 100
-        },
-        'Components'   : {
-            bldg_config: [{
-                'location'       : '1',
-                'direction'      : '1',
-                'median_quantity': '1.0',
-                'unit'           : 'ea',
-                'distribution'   : 'N/A'
-            }]
-        }
-    }
-
-    # drop keys of internal variables from BIM_ap dict
     internal_vars = ['V_ult', 'V_asd']
     for var in internal_vars:
         try:
@@ -127,4 +108,37 @@ def auto_populate(AIM):
         except:
             pass
 
-    return BIM_ap, DL_ap
+    # prepare the component assignment
+    CMP = pd.DataFrame(
+                {f'{bldg_config}': [  'ea',         1,          1,        1,   'N/A']},
+                index = [          'Units','Location','Direction','Theta_0','Family']
+            ).T
+
+    DL_ap = {
+            "Asset": {
+                "ComponentAssignmentFile": "CMP_QNT.csv",
+                "ComponentDatabase": "Hazus Hurricane",
+                "NumberOfStories": f"{GI_ap['NumberOfStories']}",
+                "OccupancyType": f"{GI_ap['OccupancyClass']}",
+                "PlanArea": f"{GI_ap['PlanArea']}"
+            },
+            "Damage": {
+                "DamageProcess": "Hazus Hurricane"
+            },
+            "Demands": {        
+            },
+            "Losses": {
+                "BldgRepair": {
+                    "ConsequenceDatabase": "Hazus Hurricane",
+                    "MapApproach": "Automatic",
+                    "DecisionVariables": {
+                        "Cost": True,
+                        "Carbon": False,
+                        "Energy": False,
+                        "Time": False
+                    }
+                }
+            }
+        }
+
+    return GI_ap, DL_ap, CMP
