@@ -67,17 +67,19 @@ def MMUH_config(BIM):
     # Secondary Water Resistance (SWR)
     # Minimum drainage recommendations are in place in NJ (See below).
     # However, SWR indicates a code-plus practice.
-    SWR = False # Default
+
+    SWR = "null" # Default
     if BIM['RoofShape'] == 'flt':
-        SWR = True
+        SWR = 'null'
     elif BIM['RoofShape'] in ['hip', 'gab']:
-        SWR = random.random() < 0.6
+        SWR = int(random.random() < 0.6)
 
     # Roof cover & Roof quality
     # Roof cover and quality do not apply to gable and hip roofs
     if BIM['RoofShape'] in ['gab', 'hip']:
-        roof_cover = 'nav'
-        roof_quality = 'nav'
+        roof_cover = 'null'
+        roof_quality = 'null'
+
     # NJ Building Code Section 1507 (in particular 1507.10 and 1507.12) address
     # Built Up Roofs and Single Ply Membranes. However, the NJ Building Code
     # only addresses installation and material standards of different roof
@@ -192,15 +194,16 @@ def MMUH_config(BIM):
         MasonryReinforcing = MR,
         ))
 
-    bldg_config = f"MMUH" \
-                  f"{int(stories)}_" \
-                  f"{BIM['RoofShape']}_" \
-                  f"{int(SWR)}_" \
-                  f"{roof_cover}_" \
-                  f"{roof_quality}_" \
-                  f"{RDA}_" \
-                  f"{RWC}_" \
-                  f"{int(shutters)}_" \
-                  f"{int(MR)}_" \
+    bldg_config = f"M.MUH." \
+                  f"{int(stories)}." \
+                  f"{BIM['RoofShape']}." \
+                  f"{int(SWR)}." \
+                  f"{roof_cover}." \
+                  f"{roof_quality}." \
+                  f"{RDA}." \
+                  f"{RWC}." \
+                  f"{int(shutters)}." \
+                  f"{int(MR)}." \
                   f"{int(BIM['TerrainRoughness'])}"
+
     return bldg_config

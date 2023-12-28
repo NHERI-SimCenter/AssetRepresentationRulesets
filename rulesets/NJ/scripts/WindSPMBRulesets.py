@@ -103,11 +103,11 @@ def SPMB_config(BIM):
         MRDA = 'sup'  # superior
 
     if BIM['PlanArea'] <= 4000:
-        bldg_tag = 'SPMBS'
+        bldg_tag = 'S.PMB.S'
     elif BIM['PlanArea'] <= 50000:
-        bldg_tag = 'SPMBM'
+        bldg_tag = 'S.PMB.M'
     else:
-        bldg_tag = 'SPMBL'
+        bldg_tag = 'S.PMB.L'
 
     # extend the BIM dictionary
     BIM.update(dict(
@@ -116,10 +116,11 @@ def SPMB_config(BIM):
         Shutters = shutters
         ))
 
-    bldg_config = f"{bldg_tag}_" \
-                  f"{roof_quality}_" \
-                  f"{int(shutters)}_" \
-                  f"{MRDA}_" \
+    bldg_config = f"{bldg_tag}." \
+                  f"{int(shutters)}." \
+                  f"{roof_quality}." \
+                  f"{MRDA}." \
                   f"{int(BIM['TerrainRoughness'])}"
+
     return bldg_config
 

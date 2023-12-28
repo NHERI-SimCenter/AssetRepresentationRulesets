@@ -70,6 +70,12 @@ def MSF_config(BIM):
     else:
         RWC = 'tnail'  # Toe-nail
 
+    # Roof Frame Type
+    RFT = BIM['RoofSystem']
+
+    # Story Flag
+    stories = min(BIM['NumberOfStories'], 2)
+
     # Shutters
     # IRC 2000-2015:
     # R301.2.1.2 in NJ IRC 2015 says protection of openings required for
@@ -97,52 +103,6 @@ def MSF_config(BIM):
         else:
             shutters = False
 
-    # Garage
-    # As per IRC 2015:
-    # Garage door glazed opening protection for windborne debris shall meet the
-    # requirements of an approved impact-resisting standard or ANSI/DASMA 115.
-    # Exception: Wood structural panels with a thickness of not less than 7/16
-    # inch and a span of not more than 8 feet shall be permitted for opening
-    # protection. Panels shall be predrilled as required for the anchorage
-    # method and shall be secured with the attachment hardware provided.
-    # Permitted for buildings where the ultimate design wind speed is 180 mph
-    # or less.
-    #
-    # Average lifespan of a garage is 30 years, so garages that are not in WindBorneDebris
-    # (and therefore do not have any strength requirements) that are older than
-    # 30 years are considered to be weak, whereas those from the last 30 years
-    # are considered to be standard.
-    if BIM['Garage'] == -1:
-        # no garage data, using the default "none"
-        garage = 'nav'
-    else:
-        if year > (datetime.datetime.now().year - 30):
-            if BIM['Garage'] < 1:
-                garage = 'nav' # None
-            else:
-                if shutters:
-                    garage = 'sup' # SFBC 1994
-                else:
-                    garage = 'std' # Standard
-        else:
-            # year <= current year - 30
-            if BIM['Garage'] < 1:
-                garage = 'nav' # None
-            else:
-                if shutters:
-                    garage = 'sup'
-                else:
-                    garage = 'wkd' # Weak
-
-    # Masonry Reinforcing (MR)
-    # R606.6.4.1.2 Metal Reinforcement states that walls other than interior
-    # non-load-bearing walls shall be anchored at vertical intervals of not
-    # more than 8 inches with joint reinforcement of not less than 9 gage.
-    # Therefore this ruleset assumes that all exterior or load-bearing masonry
-    # walls will have reinforcement. Since our considerations deal with wind
-    # speed, I made the assumption that only exterior walls are being taken
-    # into consideration.
-    MR = True
 
     if BIM['RoofSystem'] == 'trs':
 
@@ -171,6 +131,53 @@ def MSF_config(BIM):
         # However, SWR indicates a code-plus practice.
         SWR = random.random() < 0.6
 
+        # Garage
+        # As per IRC 2015:
+        # Garage door glazed opening protection for windborne debris shall meet the
+        # requirements of an approved impact-resisting standard or ANSI/DASMA 115.
+        # Exception: Wood structural panels with a thickness of not less than 7/16
+        # inch and a span of not more than 8 feet shall be permitted for opening
+        # protection. Panels shall be predrilled as required for the anchorage
+        # method and shall be secured with the attachment hardware provided.
+        # Permitted for buildings where the ultimate design wind speed is 180 mph
+        # or less.
+        #
+        # Average lifespan of a garage is 30 years, so garages that are not in WBD
+        # (and therefore do not have any strength requirements) that are older than
+        # 30 years are considered to be weak, whereas those from the last 30 years
+        # are considered to be standard.
+        if BIM['Garage'] == -1:
+            # no garage data, using the default "none"
+            garage = 'no'
+        else:
+            if year > (datetime.datetime.now().year - 30):
+                if BIM['Garage'] < 1:
+                    garage = 'no' # None
+                else:
+                    if shutters:
+                        garage = 'sup' # SFBC 1994
+                    else:
+                        garage = 'std' # Standard
+            else:
+                # year <= current year - 30
+                if BIM['Garage'] < 1:
+                    garage = 'no' # None
+                else:
+                    if shutters:
+                        garage = 'sup'
+                    else:
+                        garage = 'wkd' # Weak
+
+        # Masonry Reinforcing (MR)
+        # R606.6.4.1.2 Metal Reinforcement states that walls other than interior
+        # non-load-bearing walls shall be anchored at vertical intervals of not
+        # more than 8 inches with joint reinforcement of not less than 9 gage.
+        # Therefore this ruleset assumes that all exterior or load-bearing masonry
+        # walls will have reinforcement. Since our considerations deal with wind
+        # speed, I made the assumption that only exterior walls are being taken
+        # into consideration.
+        MR = True
+
         stories = min(BIM['NumberOfStories'], 2)
 
         # extend the BIM dictionary
@@ -183,17 +190,18 @@ def MSF_config(BIM):
             MasonryReinforcing = MR,
             ))
 
-        bldg_config = f"MSF" \
-                      f"{int(stories)}_" \
-                      f"{BIM['RoofShape']}_" \
-                      f"{int(SWR)}_" \
-                      f"{RDA}_" \
-                      f"{RWC}_" \
-                      f"{garage}_" \
-                      f"{int(shutters)}_" \
-                      f"{int(MR)}_" \
+        bldg_config = f"M.SF." \
+                      f"{int(stories)}." \
+                      f"{BIM['RoofShape']}." \
+                      f"{RWC}." \
+                      f"{RFT}." \
+                      f"{RDA}." \
+                      f"{int(shutters)}." \
+                      f"{int(SWR)}." \
+                      f"{garage}." \
+                      f"{int(MR)}." \
+                      f"null." \
                       f"{int(BIM['TerrainRoughness'])}"
-        return bldg_config
 
     else:
         # Roof system = OSJW
@@ -203,8 +211,8 @@ def MSF_config(BIM):
         # relatively stable, that implies that roughtly 15% of roofs are smlt.
         # ref. link: https://www.bdcnetwork.com/blog/metal-roofs-are-soaring-
         # popularity-residential-marmet
-        r_option = ['smtl', 'cshl']
-        r = r_option[int(random.random() < 0.85)]
+        roof_cover_options = ['smtl', 'cshl']
+        roof_cover = roof_cover_options[int(random.random() < 0.85)]
 
         # Roof Deck Attachment (RDA)
         # NJ IBC 1507.2.8.1 (for cshl)
@@ -219,11 +227,12 @@ def MSF_config(BIM):
         # Secondary Water Resistance (SWR)
         # Minimum drainage recommendations are in place in NJ (See below).
         # However, SWR indicates a code-plus practice.
-        SWR = False # Default
+        SWR = 'null' # Default
         if BIM['RoofShape'] == 'flt':
-            SWR = True
-        elif BIM['RoofShape'] in ['hip', 'gab']:
-            SWR = random.random() < 0.6
+            SWR = int(True)
+        elif ((BIM['RoofShape'] in ['hip', 'gab']) and 
+              (roof_cover=='cshl') and (RDA=='sup')):
+            SWR = int(random.random() < 0.6)
 
         stories = min(BIM['NumberOfStories'], 2)
 
@@ -237,14 +246,17 @@ def MSF_config(BIM):
             MasonryReinforcing = MR,
             ))
 
-        bldg_config = f"MSF" \
-                      f"{int(stories)}_" \
-                      f"{BIM['RoofShape']}_" \
-                      f"{int(SWR)}_" \
-                      f"{RDA}_" \
-                      f"{RWC}_" \
-                      f"{garage}_" \
-                      f"{int(shutters)}_" \
-                      f"{int(MR)}_" \
+        bldg_config = f"M.SF." \
+                      f"{int(stories)}." \
+                      f"{BIM['RoofShape']}." \
+                      f"{RWC}." \
+                      f"{RFT}." \
+                      f"{RDA}." \
+                      f"{int(shutters)}." \
+                      f"{SWR}." \
+                      f"null." \
+                      f"null." \
+                      f"{roof_cover}." \
                       f"{int(BIM['TerrainRoughness'])}"
-        return bldg_config
+
+    return bldg_config

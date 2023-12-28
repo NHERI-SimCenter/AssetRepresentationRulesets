@@ -258,15 +258,15 @@ def WMUH_config(BIM):
         Shutters = shutters
         ))
 
-    bldg_config = f"WMUH" \
-                  f"{int(stories)}_" \
-                  f"{BIM['RoofShape']}_" \
-                  f"{roof_cover}_" \
-                  f"{roof_quality}_" \
-                  f"{SWR}_" \
-                  f"{RDA}_" \
-                  f"{RWC}_" \
-                  f"{int(shutters)}_" \
+    bldg_config = f"W.MUH." \
+                  f"{int(stories)}." \
+                  f"{BIM['RoofShape']}." \
+                  f"{roof_cover}." \
+                  f"{roof_quality}." \
+                  f"{SWR}." \
+                  f"{RDA}." \
+                  f"{RWC}." \
+                  f"{int(shutters)}." \
                   f"{int(BIM['TerrainRoughness'])}"
 
     return bldg_config

@@ -84,7 +84,7 @@ def MLRI_config(BIM):
         MRDA = 'sup'  # superior
 
     if BIM['RoofShape'] in ['gab', 'hip']:
-        roof_cover = 'nav'
+        roof_cover = 'null'
         roof_quality = 'god' # default supported by HAZUS
     else:
         if year >= 1975:
@@ -110,11 +110,12 @@ def MLRI_config(BIM):
         MasonryReinforcing = MR,
         ))
 
-    bldg_config = f"MLRI_" \
-                  f"{roof_quality}_" \
-                  f"{int(shutters)}_" \
-                  f"{int(MR)}_" \
-                  f"{MRDA}_" \
+    bldg_config = f"M.LRI." \
+                  f"{int(shutters)}." \
+                  f"{int(MR)}." \
+                  f"{roof_quality}." \
+                  f"{MRDA}." \
                   f"{int(BIM['TerrainRoughness'])}"
+
     return bldg_config
 

@@ -115,11 +115,11 @@ def MECB_config(BIM):
         WWR = 'hig'
 
     if BIM['NumberOfStories'] <= 2:
-        bldg_tag = 'MECBL'
+        bldg_tag = 'M.ECB.L'
     elif BIM['NumberOfStories'] <= 5:
-        bldg_tag = 'MECBM'
+        bldg_tag = 'M.ECB.M'
     else:
-        bldg_tag = 'MECBH'
+        bldg_tag = 'M.ECB.H'
 
     # extend the BIM dictionary
     BIM.update(dict(
@@ -130,11 +130,12 @@ def MECB_config(BIM):
         WindDebrisClass = WIDD
         ))
 
-    bldg_config = f"{bldg_tag}_" \
-                  f"{roof_cover}_" \
-                  f"{WWR}_" \
-                  f"{int(shutters)}_" \
-                  f"{WIDD}_" \
-                  f"{MRDA}_" \
+    bldg_config = f"{bldg_tag}." \
+                  f"{roof_cover}." \
+                  f"{int(shutters)}." \
+                  f"{WIDD}." \
+                  f"{MRDA}." \
+                  f"{WWR}." \
                   f"{int(BIM['TerrainRoughness'])}"
+
     return bldg_config

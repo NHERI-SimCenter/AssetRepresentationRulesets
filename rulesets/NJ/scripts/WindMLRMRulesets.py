@@ -114,7 +114,7 @@ def MLRM_config(BIM):
 
     if BIM['RoofSystem'] == 'ows':
         # RDA
-        RDA = '6d' # HAZUS the only available option for OWSJ
+        RDA = 'null' # Doesn't apply to OWSJ
 
         # Roof deck age (DQ)
         # Average lifespan of a steel joist roof is roughly 50 years according
@@ -127,7 +127,7 @@ def MLRM_config(BIM):
             DQ = 'por' # old
 
         # RWC
-        RWC = 'tnail'  # Toe-nail (HAZUS the only available option for OWSJ)
+        RWC = 'null'  # Doesn't apply to OWSJ
 
         # Metal RDA
         # 1507.2.8.1 High Wind Attachment.
@@ -156,10 +156,10 @@ def MLRM_config(BIM):
                 RDA = '8d'  # 8d @ 6"/12" 'B'
 
         #  Metal RDA
-        MRDA = 'nav'
+        MRDA = 'null' # Doesn't apply to Wood Truss
 
         # Roof deck agea (DQ)
-        DQ = 'nav' # not available for wood truss system
+        DQ = 'null' # Doesn't apply to Wood Truss
 
         # RWC
         if BIM['V_ult'] > 110:
@@ -190,29 +190,30 @@ def MLRM_config(BIM):
             ))
 
         # if it's MLRM1, configure outputs
-        bldg_config = f"MLRM1_" \
-                      f"{roof_cover}_" \
-                      f"{RDA}_" \
-                      f"{DQ}_" \
-                      f"{BIM['RoofSystem']}_" \
-                      f"{RWC}_" \
-                      f"{int(shutters)}_" \
-                      f"{WIDD}_" \
-                      f"{int(MR)}_" \
-                      f"{MRDA}_" \
+        bldg_config = f"M.LRM.1." \
+                      f"{roof_cover}." \
+                      f"{int(shutters)}." \
+                      f"{int(MR)}." \
+                      f"{WIDD}." \
+                      f"{BIM['RoofSystem']}." \
+                      f"{RDA}." \
+                      f"{RWC}." \
+                      f"{DQ}." \
+                      f"{MRDA}." \
                       f"{int(BIM['TerrainRoughness'])}"
-        return bldg_config
+
     else:
-        unit_tag = 'nav'
+        unit_tag = 'null'
         # MLRM2 needs more rulesets
+
         if BIM['RoofSystem'] == 'trs':
-            JSPA = 0
+            joist_spacing = 'null'
         elif BIM['RoofSystem'] == 'ows':
             if BIM['NumberOfUnits'] == 1:
-                JSPA = 0
+                joist_spacing = 'null'
                 unit_tag = 'sgl'
             else:
-                JSPA = 4
+                joist_spacing = 4
                 unit_tag = 'mlt'
 
         # extend the BIM dictionary
@@ -228,18 +229,18 @@ def MLRM_config(BIM):
             UnitType=unit_tag
             ))
 
-        bldg_config = f"MLRM2_" \
-                      f"{roof_cover}_" \
-                      f"{RDA}_" \
-                      f"{DQ}_" \
-                      f"{BIM['RoofSystem']}_" \
-                      f"{JSPA}_" \
-                      f"{RWC}_" \
-                      f"{int(shutters)}_" \
-                      f"{WIDD}_" \
-                      f"{unit_tag}_" \
-                      f"{int(MR)}_" \
-                      f"{MRDA}_" \
+        bldg_config = f"M.LRM.2." \
+                      f"{roof_cover}." \
+                      f"{int(shutters)}." \
+                      f"{int(MR)}." \
+                      f"{WIDD}." \
+                      f"{BIM['RoofSystem']}." \
+                      f"{RDA}." \
+                      f"{RWC}." \
+                      f"{DQ}." \
+                      f"{MRDA}." \
+                      f"{unit_tag}." \
+                      f"{joist_spacing}." \
                       f"{int(BIM['TerrainRoughness'])}"
-        return bldg_config
-
+        
+    return bldg_config

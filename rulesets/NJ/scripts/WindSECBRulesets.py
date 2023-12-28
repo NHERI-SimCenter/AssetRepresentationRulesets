@@ -124,11 +124,11 @@ def SECB_config(BIM):
         MRDA = 'sup'  # superior
 
     if BIM['NumberOfStories'] <= 2:
-        bldg_tag = 'SECBL'
+        bldg_tag = 'S.ECB.L'
     elif BIM['NumberOfStories'] <= 5:
-        bldg_tag = 'SECBM'
+        bldg_tag = 'S.ECB.M'
     else:
-        bldg_tag = 'SECBH'
+        bldg_tag = 'S.ECB.H'
 
     # extend the BIM dictionary
     BIM.update(dict(
@@ -139,12 +139,13 @@ def SECB_config(BIM):
         WindDebrisClass=WIDD
         ))
 
-    bldg_config = f"{bldg_tag}_" \
-                  f"{roof_cover}_" \
-                  f"{WWR}_" \
-                  f"{int(shutters)}_" \
-                  f"{WIDD}_" \
-                  f"{MRDA}_" \
+    bldg_config = f"{bldg_tag}." \
+                  f"{roof_cover}." \
+                  f"{int(shutters)}." \
+                  f"{WIDD}." \
+                  f"{MRDA}." \
+                  f"{WWR}." \
                   f"{int(BIM['TerrainRoughness'])}"
+                  
     return bldg_config
 

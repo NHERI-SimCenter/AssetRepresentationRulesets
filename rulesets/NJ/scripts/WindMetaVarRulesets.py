@@ -45,12 +45,13 @@
 
 import random
 import numpy as np
+import pandas as pd
 import datetime
 import math
 
 def parse_BIM(BIM_in, location, hazards):
     """
-    Parses the information provided in the BIM model.
+    Parses the information provided in the AIM model.
 
     The parameters below list the expected inputs
 
@@ -80,7 +81,7 @@ def parse_BIM(BIM_in, location, hazards):
 
     Returns
     -------
-    BIM: dictionary
+    GI_ap: dictionary
         Parsed building characteristics.
     """
 
@@ -94,7 +95,7 @@ def parse_BIM(BIM_in, location, hazards):
             print(f'WARNING: The provided hazard is not recognized: {hazard}')
 
     # initialize the BIM dict
-    BIM = {}
+    BIM_ap = BIM_in.copy()
 
     if 'wind' in hazards:
 
@@ -116,11 +117,9 @@ def parse_BIM(BIM_in, location, hazards):
             'N/A': 'trs'
         }
         roof_system = BIM_in.get('RoofSystem','Wood')
-        try:
-            if np.isnan(roof_system):
-                roof_system = 'Wood'
-        except:
-            pass
+        if pd.isna(roof_system):
+            roof_system = 'Wood'
+
         # maps number of units to the internal representation
         ap_NoUnits = {
             'Single': 'sgl',
@@ -137,11 +136,8 @@ def parse_BIM(BIM_in, location, hazards):
             'ME': 'E'
         }
         design_level = BIM_in.get('DesignLevel','E')
-        try:
-            if np.isnan(design_level):
-                design_level = 'E'
-        except:
-            pass
+        if pd.isna(design_level):
+            design_level = 'E'
 
         # Average January Temp.
         ap_ajt = {
@@ -150,63 +146,76 @@ def parse_BIM(BIM_in, location, hazards):
         }
 
         # Year built
-        alname_yearbuilt = ['yearBuilt', 'YearBuiltMODIV', 'YearBuilt']
-        yearbuilt = 1985
+        alname_yearbuilt = ['YearBuiltNJDEP', 'yearBuilt', 'YearBuiltMODIV']
+        yearbuilt = None
         try:
-            yearbuilt = BIM_in['YearBuiltNJDEP']
+            yearbuilt = BIM_in['YearBuilt']
         except:
             for i in alname_yearbuilt:
                 if i in BIM_in.keys():
                     yearbuilt = BIM_in[i]
                     break
-        print('yearbuilt = ', yearbuilt)
 
+        # if none of the above works, set a default
+        if yearbuilt is None:
+            yearbuilt = 1985
 
         # Number of Stories
-        alname_nstories = ['stories', 'NumberofStories0', 'NumberofStories', 'NumberOfStories']
+        alname_nstories = ['stories', 'NumberofStories0', 'NumberofStories', 'NumberofStories1']
+        nstories = None
         try:
-            nstories = BIM_in['NumberofStories1']
-        except:
+            nstories = BIM_in['NumberOfStories']
+        except Exception as e:
             for i in alname_nstories:
                 if i in BIM_in.keys():
                     nstories = BIM_in[i]
                     break
-        print('nstories = ', nstories)
+
+            # if none of the above works, we need to raise an exception
+            if nstories is None:
+                raise e from None
 
         # Plan Area
-        alname_area = ['area', 'PlanArea1', 'Area', 'PlanArea']
+        alname_area = ['area', 'PlanArea1', 'Area', 'PlanArea0']
+        area = None
         try:
-            area = BIM_in['PlanArea0']
-        except:
+            area = BIM_in['PlanArea']
+        except Exception as e:
             for i in alname_area:
                 if i in BIM_in.keys():
                     area = BIM_in[i]
                     break
 
+            # if none of the above works, we need to raise an exception
+            if area is None:
+                raise e from None
+
         # Design Wind Speed
         alname_dws = ['DSWII', 'DWSII', 'DesignWindSpeed']
 
-        dws = BIM_in.get('DWSII', None)
+        dws = BIM_in.get('DesignWindSpeed', None)
         if dws is None:
             for alname in alname_dws:
                 if alname in BIM_in.keys():
                     dws = BIM_in[alname]
                     break
 
-        # if getting RES3 then converting it to default RES3A
-        alname_occupancy = ['OccupancyClass']
+        
+        alname_occupancy = ['occupancy']
+        oc = None
         try:
-            oc = BIM_in['occupancy']
-            if math.isnan(oc):
-                for i in alname_occupancy:
-                    if i in BIM_in.keys():
-                        oc = BIM_in[i]
-                        break
-        except:
+            oc = BIM_in['OccupancyClass']
+        except Exception as e:
             for i in alname_occupancy:
                 if i in BIM_in.keys():
                     oc = BIM_in[i]
                     break
+
+            # if none of the above works, we need to raise an exception
+            if oc is None:
+                raise e from None
+
+        # if getting RES3 then converting it to default RES3A
         if oc == 'RES3':
             oc = 'RES3A'
 
@@ -255,21 +264,12 @@ def parse_BIM(BIM_in, location, hazards):
             # standard input should provide the building type as a string
             buildingtype = BIM_in['BuildingType']
 
-        # maps for design level (Marginal Engineered is mapped to Engineered as default)
-        ap_DesignLevel = {
-            'E': 'E',
-            'NE': 'NE',
-            'PE': 'PE',
-            'ME': 'E'
-        }
-        design_level = BIM_in.get('DesignLevel','E')
-
         # first, pull in the provided data
-        BIM = dict(
+        BIM_ap.update(dict(
             OccupancyClass=str(oc),
             BuildingType=buildingtype,
             YearBuilt=int(yearbuilt),
-            # double check with Tracey for format - (NumberStories0 is 4-digit code)
+            # double check with Tracy for format - (NumberStories0 is 4-digit code)
             # (NumberStories1 is image-processed story number)
             NumberOfStories=int(nstories),
             PlanArea=float(area),
@@ -288,7 +288,7 @@ def parse_BIM(BIM_in, location, hazards):
             DesignLevel=str(ap_DesignLevel[design_level]), # default engineered
             WindowArea=float(BIM_in.get('WindowArea',0.20)),
             WoodZone=str(BIM_in.get('WindZone', 'I'))
-        )
+        ))
 
     if 'inundation' in hazards:
 
@@ -299,11 +299,11 @@ def parse_BIM(BIM_in, location, hazards):
         }
 
         foundation = BIM_in.get('FoundationType',3501)
-        if np.isnan(foundation):
+        if pd.isna(foundation):
             foundation = 3501
 
         nunits = BIM_in.get('NoUnits',1)
-        if np.isnan(nunits):
+        if pd.isna(nunits):
             nunits = 1
 
         # maps for flood zone
@@ -335,7 +335,7 @@ def parse_BIM(BIM_in, location, hazards):
             floodzone_fema = BIM_in['FloodZone']
 
         # add the parsed data to the BIM dict
-        BIM.update(dict(
+        BIM_ap.update(dict(
             DesignLevel=str(ap_DesignLevel[design_level]), # default engineered
             NumberOfUnits=int(nunits),
             FirstFloorElevation=float(BIM_in.get('FirstFloorHt1',10.0)),
@@ -439,7 +439,7 @@ def parse_BIM(BIM_in, location, hazards):
             elif ((BIM['Terrain'] >= 41) and (BIM['Terrain'] <= 43)) or (BIM['Terrain'] in [16, 17]):
                 terrain = 70 # light trees
 
-        BIM.update(dict(
+        BIM_ap.update(dict(
             # Nominal Design Wind Speed
             # Former term was “Basic Wind Speed”; it is now the “Nominal Design
             # Wind Speed (V_asd). Unit: mph."
@@ -452,12 +452,12 @@ def parse_BIM(BIM_in, location, hazards):
 
     if 'inundation' in hazards:
 
-        BIM.update(dict(
+        BIM_ap.update(dict(
             # Flood Risk
             # Properties in the High Water Zone (within 1 mile of the coast) are at
             # risk of flooding and other wind-borne debris action.
             FloodRisk=True,  # TODO: need high water zone for this and move it to inputs!
         ))
 
-    return BIM
+    return BIM_ap
 

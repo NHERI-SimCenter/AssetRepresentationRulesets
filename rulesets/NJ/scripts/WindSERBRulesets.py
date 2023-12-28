@@ -124,11 +124,11 @@ def SERB_config(BIM):
         MRDA = 'sup'  # superior
 
     if BIM['NumberOfStories'] <= 2:
-        bldg_tag = 'SERBL'
+        bldg_tag = 'S.ERB.L'
     elif BIM['NumberOfStories'] <= 5:
-        bldg_tag = 'SERBM'
+        bldg_tag = 'S.ERB.M'
     else:
-        bldg_tag = 'SERBH'
+        bldg_tag = 'S.ERB.H'
 
     # extend the BIM dictionary
     BIM.update(dict(
@@ -139,11 +139,12 @@ def SERB_config(BIM):
         WindDebrisClass=WIDD
         ))
 
-    bldg_config = f"{bldg_tag}_" \
-                  f"{roof_cover}_" \
-                  f"{WWR}_" \
-                  f"{int(shutters)}_" \
-                  f"{WIDD}_" \
-                  f"{MRDA}_" \
+    bldg_config = f"{bldg_tag}." \
+                  f"{roof_cover}." \
+                  f"{int(shutters)}." \
+                  f"{WIDD}." \
+                  f"{MRDA}." \
+                  f"{WWR}." \
                   f"{int(BIM['TerrainRoughness'])}"
+
     return bldg_config

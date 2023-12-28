@@ -117,11 +117,11 @@ def MERB_config(BIM):
         WWR = 'hig'
 
     if BIM['NumberOfStories'] <= 2:
-        bldg_tag = 'MERBL'
+        bldg_tag = 'M.ERB.L'
     elif BIM['NumberOfStories'] <= 5:
-        bldg_tag = 'MERBM'
+        bldg_tag = 'M.ERB.M'
     else:
-        bldg_tag = 'MERBH'
+        bldg_tag = 'M.ERB.H'
 
     # extend the BIM dictionary
     BIM.update(dict(
@@ -132,11 +132,12 @@ def MERB_config(BIM):
         WindDebrisClass = WIDD
         ))
 
-    bldg_config = f"{bldg_tag}_" \
-                  f"{roof_cover}_" \
-                  f"{WWR}_" \
-                  f"{int(shutters)}_" \
-                  f"{WIDD}_" \
-                  f"{MRDA}_" \
+    bldg_config = f"{bldg_tag}." \
+                  f"{roof_cover}." \
+                  f"{int(shutters)}." \
+                  f"{WIDD}." \
+                  f"{MRDA}." \
+                  f"{WWR}." \
                   f"{int(BIM['TerrainRoughness'])}"
+
     return bldg_config
