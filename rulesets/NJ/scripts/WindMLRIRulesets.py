@@ -84,7 +84,6 @@ def MLRI_config(BIM):
         MRDA = 'sup'  # superior
 
     if BIM['roof_shape'] in ['gab', 'hip']:
-        roof_cover = 'nav'
         roof_quality = 'god' # default supported by HAZUS
     else:
         if year >= 1975:

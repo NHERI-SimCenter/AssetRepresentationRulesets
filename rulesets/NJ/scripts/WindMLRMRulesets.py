@@ -114,7 +114,7 @@ def MLRM_config(BIM):
 
     if BIM['roof_system'] == 'ows':
         # RDA
-        RDA = '6d' # HAZUS the only available option for OWSJ
+        RDA = 'null' # Doesn't apply to OWSJ
 
         # Roof deck age (DQ)
         # Average lifespan of a steel joist roof is roughly 50 years according
@@ -127,7 +127,7 @@ def MLRM_config(BIM):
             DQ = 'por' # old
 
         # RWC
-        RWC = 'tnail'  # Toe-nail (HAZUS the only available option for OWSJ)
+        RWC = 'null'  # Doesn't apply to OWSJ
 
         # Metal RDA
         # 1507.2.8.1 High Wind Attachment.
@@ -156,10 +156,10 @@ def MLRM_config(BIM):
                 RDA = '8d'  # 8d @ 6"/12" 'B'
 
         #  Metal RDA
-        MRDA = 'nav'
+        MRDA = 'null' # Doesn't apply to Wood Truss
 
         # Roof deck agea (DQ)
-        DQ = 'nav' # not available for wood truss system
+        DQ = 'null' # Doesn't apply to Wood Truss
 
         # RWC
         if BIM['V_ult'] > 110:
@@ -189,18 +189,18 @@ def MLRM_config(BIM):
                       f"{DQ}." \
                       f"{MRDA}." \
                       f"{int(BIM['terrain'])}"
-        return bldg_config
+
     else:
-        unit_tag = 'nav'
+        unit_tag = 'null'
         # MLRM2 needs more rulesets
         if BIM['roof_system'] == 'trs':
-            JSPA = 0
+            joist_spacing = 'null'
         elif BIM['roof_system'] == 'ows':
             if BIM['no_units'] == 1:
-                JSPA = 0
+                joist_spacing = 'null'
                 unit_tag = 'sgl'
             else:
-                JSPA = 4
+                joist_spacing = 4
                 unit_tag = 'mlt'
 
         bldg_config = f"M.LRM.2." \
