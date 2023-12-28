@@ -266,7 +266,7 @@ def WSF_config(BIM):
         RoofDeckAttachmentW = RDA,
         RoofToWallConnection = RWC,
         Shutters = shutters,
-        Garage = garage
+        AugmentedGarage = garage
         ))
 
     # building configuration tag
