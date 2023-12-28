@@ -101,12 +101,10 @@ def parse_BIM(BIM_in):
         'OWSJ': 'ows',
         'N/A': 'trs'
     }
-    roof_system = BIM_in.get('RoofSystem','Wood')
-    try:
-        if np.isnan(roof_system):
-            roof_system = 'Wood'
-    except:
-        pass
+    roof_system = GI_in.get('RoofSystem','Wood')
+    if pd.isna(roof_system):
+        roof_system = 'Wood'
+
     # maps number of units to the internal representation
     ap_NoUnits = {
         'Single': 'sgl',
@@ -126,18 +124,15 @@ def parse_BIM(BIM_in):
         'PE': 'PE',
         'ME': 'E'
     }
-    design_level = BIM_in.get('DesignLevel','E')
-    try:
-        if np.isnan(design_level):
-            design_level = 'E'
-    except:
-        pass
+    design_level = GI_in.get('DesignLevel','E')
+    if pd.isna(design_level):
+        design_level = 'E'
 
-    foundation = BIM_in.get('FoundationType',3501)
+    foundation = GI_in.get('FoundationType',3501)
     if np.isnan(foundation):
         foundation = 3501
 
-    nunits = BIM_in.get('NoUnits',1)
+    nunits = GI_in.get('NoUnits',1)
     if np.isnan(nunits):
         nunits = 1
 
@@ -148,53 +143,67 @@ def parse_BIM(BIM_in):
     }
 
     # Year built
-    alname_yearbuilt = ['yearBuilt', 'YearBuiltMODIV', 'YearBuilt']
-    yearbuilt = 1985
+    alname_yearbuilt = ['YearBuiltNJDEP', 'yearBuilt', 'YearBuiltMODIV', 'YearBuilt']
+    yearbuilt = None
     try:
-        yearbuilt = BIM_in['YearBuiltNJDEP']
-    except:
+        yearbuilt = GI_in['YearBuilt']
+    except Exception as e:
         for i in alname_yearbuilt:
-            if i in BIM_in.keys():
-                yearbuilt = BIM_in[i]
+            if i in GI_in.keys():
+                yearbuilt = GI_in[i]
                 break
-    print('yearbuilt = ', yearbuilt)
 
+        # if none of the above works, set a default
+        if yearbuilt is None:
+            yearbuilt = 1985
 
     # Number of Stories
-    alname_nstories = ['stories', 'NumberofStories0', 'NumberofStories']
+    alname_nstories = ['stories', 'NumberofStories0', 'NumberofStories1']
+    nstories = None
     try:
-        nstories = BIM_in['NumberofStories1']
-    except:
+        nstories = GI_in['NumberOfStories']
+    except Exception as e:
         for i in alname_nstories:
-            if i in BIM_in.keys():
-                nstories = BIM_in[i]
+            if i in GI_in.keys():
+                nstories = GI_in[i]
                 break
-    print('nstories = ', nstories)
+
+        # if none of the above works, we need to raise an exception
+        if nstories is None:
+            raise e from None
 
     # Plan Area
-    alname_area = ['area', 'PlanArea1', 'Area']
+    alname_area = ['area', 'PlanArea1', 'Area', 'PlanArea0']
+    area = None
     try:
-        area = BIM_in['PlanArea0']
-    except:
+        area = GI_in['PlanArea']
+    except Exception as e:
         for i in alname_area:
-            if i in BIM_in.keys():
-                area = BIM_in[i]
+            if i in GI_in.keys():
+                area = GI_in[i]
                 break
 
-    # if getting RES3 then converting it to default RES3A
-    alname_occupancy = ['OccupancyClass']
+        # if none of the above works, we need to raise an exception
+        if area is None:
+            raise e from None
+
+    # Occupancy Class
+    alname_occupancy = ['occupancy']
+    oc = None
     try:
-        oc = BIM_in['occupancy']
-        if math.isnan(oc):
-            for i in alname_occupancy:
-                if i in BIM_in.keys():
-                    oc = BIM_in[i]
-                    break
-    except:
+        oc = GI_in['OccupancyClass']
+
+    except Exception as e:
         for i in alname_occupancy:
-            if i in BIM_in.keys():
-                oc = BIM_in[i]
+            if i in GI_in.keys():
+                oc = GI_in[i]
                 break
+
+        # if none of the above works, we need to raise an exception
+        if oc is None:
+            raise e from None
+
+    # if getting RES3 then converting it to default RES3A
     if oc == 'RES3':
         oc = 'RES3A'
 
