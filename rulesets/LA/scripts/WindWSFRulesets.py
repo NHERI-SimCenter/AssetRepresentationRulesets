@@ -270,14 +270,15 @@ def WSF_config(BIM):
         ))
 
     # building configuration tag
-    bldg_config = f"WSF" \
-                  f"{int(min(BIM['NumberOfStories'],2))}_" \
-                  f"{BIM['RoofShape']}_" \
-                  f"{int(SWR)}_" \
-                  f"{RDA}_" \
-                  f"{RWC}_" \
-                  f"{garage}_" \
-                  f"{int(shutters)}_" \
+    bldg_config = f"W.SF." \
+                  f"{int(min(BIM['NumberOfStories'],2))}." \
+                  f"{BIM['RoofShape']}." \
+                  f"{int(SWR)}." \
+                  f"{RDA}." \
+                  f"{RWC}." \
+                  f"{garage}." \
+                  f"{int(shutters)}." \
                   f"{int(BIM['TerrainRoughness'])}"
+                  
     return bldg_config
 

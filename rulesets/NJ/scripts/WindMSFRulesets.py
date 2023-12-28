@@ -71,6 +71,12 @@ def MSF_config(BIM):
     else:
         RWC = 'tnail'  # Toe-nail
 
+    # Roof Frame Type
+    RFT = BIM['roof_system']
+
+    # Story Flag
+    stories = min(BIM['stories'], 2)
+
     # Shutters
     # IRC 2000-2015:
     # R301.2.1.2 in NJ IRC 2015 says protection of openings required for
@@ -98,9 +104,36 @@ def MSF_config(BIM):
         else:
             shutters = False
 
-    # Garage
-    # As per IRC 2015:
-    # Garage door glazed opening protection for windborne debris shall meet the
+    if BIM['roof_system'] == 'trs':
+
+        # Roof Deck Attachment (RDA)
+        # IRC codes:
+        # NJ code requires 8d nails (with spacing 6”/12”) for sheathing thicknesses
+        # between ⅜”-1” -  see Table R602.3(1)
+        # Fastener selection is contingent on thickness of sheathing in building
+        # codes. Commentary for Table R602.3(1) indicates 8d nails with 6”/6”
+        # spacing (enhanced roof spacing) for ultimate wind speeds greater than
+        # a speed_lim. speed_lim depends on the year of construction
+        RDA = '6d' # Default (aka A) in Reorganized Rulesets - WIND
+        if year >= 2016:
+            # IRC 2015
+            speed_lim = 130.0 # mph
+        else:
+            # IRC 2000 - 2009
+            speed_lim = 100.0 # mph
+        if BIM['V_ult'] > speed_lim:
+            RDA = '8s'  # 8d @ 6"/6" ('D' in the Reorganized Rulesets - WIND)
+        else:
+            RDA = '8d'  # 8d @ 6"/12" ('B' in the Reorganized Rulesets - WIND)
+
+        # Secondary Water Resistance (SWR)
+        # Minimum drainage recommendations are in place in NJ (See below).
+        # However, SWR indicates a code-plus practice.
+        SWR = random.random() < 0.6
+
+        # Garage
+        # As per IRC 2015:
+        # Garage door glazed opening protection for windborne debris shall meet the
     # requirements of an approved impact-resisting standard or ANSI/DASMA 115.
     # Exception: Wood structural panels with a thickness of not less than 7/16
     # inch and a span of not more than 8 feet shall be permitted for opening
@@ -142,48 +175,21 @@ def MSF_config(BIM):
     # Therefore this ruleset assumes that all exterior or load-bearing masonry
     # walls will have reinforcement. Since our considerations deal with wind
     # speed, I made the assumption that only exterior walls are being taken
-    # into consideration.
-    MR = True
+        # into consideration.
+        MR = True
 
-    if BIM['roof_system'] == 'trs':
-
-        # Roof Deck Attachment (RDA)
-        # IRC codes:
-        # NJ code requires 8d nails (with spacing 6”/12”) for sheathing thicknesses
-        # between ⅜”-1” -  see Table R602.3(1)
-        # Fastener selection is contingent on thickness of sheathing in building
-        # codes. Commentary for Table R602.3(1) indicates 8d nails with 6”/6”
-        # spacing (enhanced roof spacing) for ultimate wind speeds greater than
-        # a speed_lim. speed_lim depends on the year of construction
-        RDA = '6d' # Default (aka A) in Reorganized Rulesets - WIND
-        if year >= 2016:
-            # IRC 2015
-            speed_lim = 130.0 # mph
-        else:
-            # IRC 2000 - 2009
-            speed_lim = 100.0 # mph
-        if BIM['V_ult'] > speed_lim:
-            RDA = '8s'  # 8d @ 6"/6" ('D' in the Reorganized Rulesets - WIND)
-        else:
-            RDA = '8d'  # 8d @ 6"/12" ('B' in the Reorganized Rulesets - WIND)
-
-        # Secondary Water Resistance (SWR)
-        # Minimum drainage recommendations are in place in NJ (See below).
-        # However, SWR indicates a code-plus practice.
-        SWR = random.random() < 0.6
-
-        stories = min(BIM['stories'], 2)
-        bldg_config = f"MSF" \
-                      f"{int(stories)}_" \
-                      f"{BIM['roof_shape']}_" \
-                      f"{int(SWR)}_" \
-                      f"{RDA}_" \
-                      f"{RWC}_" \
-                      f"{garage}_" \
-                      f"{int(shutters)}_" \
-                      f"{int(MR)}_" \
+        bldg_config = f"M.SF." \
+                      f"{int(stories)}." \
+                      f"{BIM['roof_shape']}." \
+                      f"{RWC}." \
+                      f"{RFT}." \
+                      f"{RDA}." \
+                      f"{int(shutters)}." \
+                      f"{int(SWR)}." \
+                      f"{garage}." \
+                      f"{int(MR)}." \
+                      f"null." \
                       f"{int(BIM['terrain'])}"
-        return bldg_config
 
     else:
         # Roof system = OSJW
@@ -215,15 +221,18 @@ def MSF_config(BIM):
         elif BIM['roof_shape'] in ['hip', 'gab']:
             SWR = random.random() < 0.6
 
-        stories = min(BIM['stories'], 2)
-        bldg_config = f"MSF" \
-                      f"{int(stories)}_" \
-                      f"{BIM['roof_shape']}_" \
-                      f"{int(SWR)}_" \
-                      f"{RDA}_" \
-                      f"{RWC}_" \
-                      f"{garage}_" \
-                      f"{int(shutters)}_" \
-                      f"{int(MR)}_" \
+
+        bldg_config = f"M.SF." \
+                      f"{int(stories)}." \
+                      f"{BIM['roof_shape']}." \
+                      f"{RWC}." \
+                      f"{RFT}." \
+                      f"{RDA}." \
+                      f"{int(shutters)}." \
+                      f"{SWR}." \
+                      f"null." \
+                      f"null." \
+                      f"{roof_cover}." \
                       f"{int(BIM['terrain'])}"
-        return bldg_config
+
+    return bldg_config

@@ -101,11 +101,11 @@ def MLRI_config(BIM):
             else:
                 roof_quality = 'por'
 
-    bldg_config = f"MLRI_" \
-                  f"{roof_quality}_" \
-                  f"{int(shutters)}_" \
-                  f"{int(MR)}_" \
-                  f"{MRDA}_" \
+    bldg_config = f"M.LRI." \
+                  f"{int(shutters)}." \
+                  f"{int(MR)}." \
+                  f"{roof_quality}." \
+                  f"{MRDA}." \
                   f"{int(BIM['terrain'])}"
     return bldg_config
 

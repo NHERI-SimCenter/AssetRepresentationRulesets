@@ -91,12 +91,16 @@ def HUEFFS_config(BIM):
     else:
         MRDA = 'std'  # standard
 
-    bldg_tag = 'HUEFFS'
-    bldg_config = f"{bldg_tag}_" \
-                  f"{roof_cover}_" \
-                  f"{WIDD}_" \
-                  f"{DQ}_" \
-                  f"{MRDA}_" \
+    # Shutters
+    shutters = int(BIM['WBD'])
+
+    bldg_tag = 'HUEF.FS'
+    bldg_config = f"{bldg_tag}." \
+                  f"{roof_cover}." \
+                  f"{shutters}." \
+                  f"{WIDD}." \
+                  f"{DQ}." \
+                  f"{MRDA}." \
                   f"{int(BIM['terrain'])}"
     return bldg_config
 
@@ -146,13 +150,13 @@ def HUEFSS_config(BIM):
     # Shutters
     shutters = BIM['WBD']
 
-    bldg_tag = 'HUEFSS'
-    bldg_config = f"{bldg_tag}_" \
-                  f"{roof_cover}_" \
-                  f"{WIDD}_" \
-                  f"{DQ}_" \
-                  f"{MRDA}_" \
-                  f"{int(shutters)}_" \
+    bldg_tag = 'HUEF.S.S'
+    bldg_config = f"{bldg_tag}." \
+                  f"{roof_cover}." \
+                  f"{int(shutters)}." \
+                  f"{WIDD}." \
+                  f"{DQ}." \
+                  f"{MRDA}." \
                   f"{int(BIM['terrain'])}"
     return bldg_config
 
@@ -198,17 +202,17 @@ def HUEFH_config(BIM):
         MRDA = 'std'  # standard
 
     if BIM['stories'] <=2:
-        bldg_tag = 'HUEFHS'
+        bldg_tag = 'HUEF.H.S'
     elif BIM['stories'] <= 5:
-        bldg_tag = 'HUEFHM'
+        bldg_tag = 'HUEF.H.M'
     else:
-        bldg_tag = 'HUEFHL'
+        bldg_tag = 'HUEF.H.L'
 
-    bldg_config = f"{bldg_tag}_" \
-                  f"{roof_cover}_" \
-                  f"{WIDD}_" \
-                  f"{MRDA}_" \
-                  f"{int(shutters)}_" \
+    bldg_config = f"{bldg_tag}." \
+                  f"{roof_cover}." \
+                  f"{WIDD}." \
+                  f"{MRDA}." \
+                  f"{int(shutters)}." \
                   f"{int(BIM['terrain'])}"
     return bldg_config
 
@@ -260,14 +264,15 @@ def HUEFS_config(BIM):
         MRDA = 'std'  # standard
 
     if BIM['stories'] <=2:
-        bldg_tag = 'HUEFSM'
+        bldg_tag = 'HUEF.S.M'
     else:
-        bldg_tag = 'HUEFSL'
-        
-    bldg_config = f"{bldg_tag}_" \
-                  f"{roof_cover}_" \
-                  f"{WIDD}_" \
-                  f"{MRDA}_" \
-                  f"{int(shutters)}_" \
+        bldg_tag = 'HUEF.S.L'
+
+    bldg_config = f"{bldg_tag}." \
+                  f"{roof_cover}." \
+                  f"{int(shutters)}." \
+                  f"{WIDD}." \
+                  f"null." \
+                  f"{MRDA}." \
                   f"{int(BIM['terrain'])}"
     return bldg_config

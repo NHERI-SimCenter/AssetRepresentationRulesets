@@ -181,15 +181,15 @@ def MMUH_config(BIM):
     MR = True
 
     stories = min(BIM['stories'], 3)
-    bldg_config = f"MMUH" \
-                  f"{int(stories)}_" \
-                  f"{BIM['roof_shape']}_" \
-                  f"{int(SWR)}_" \
-                  f"{roof_cover}_" \
-                  f"{roof_quality}_" \
-                  f"{RDA}_" \
-                  f"{RWC}_" \
-                  f"{int(shutters)}_" \
-                  f"{int(MR)}_" \
+    bldg_config = f"M.MUH." \
+                  f"{int(stories)}." \
+                  f"{BIM['roof_shape']}." \
+                  f"{int(SWR)}." \
+                  f"{roof_cover}." \
+                  f"{roof_quality}." \
+                  f"{RDA}." \
+                  f"{RWC}." \
+                  f"{int(shutters)}." \
+                  f"{int(MR)}." \
                   f"{int(BIM['terrain'])}"
     return bldg_config

@@ -263,14 +263,14 @@ def WSF_config(BIM):
                 shutters = 0 # HAZUS ties weak garage to w/o shutters
 
     # building configuration tag
-    bldg_config = f"WSF" \
-                  f"{int(min(BIM['stories'],2))}_" \
-                  f"{BIM['roof_shape']}_" \
-                  f"{int(SWR)}_" \
-                  f"{RDA}_" \
-                  f"{RWC}_" \
-                  f"{garage}_" \
-                  f"{int(shutters)}_" \
+    bldg_config = f"W.SF." \
+                  f"{int(min(BIM['stories'],2))}." \
+                  f"{BIM['roof_shape']}." \
+                  f"{int(SWR)}." \
+                  f"{RDA}." \
+                  f"{RWC}." \
+                  f"{garage}." \
+                  f"{int(shutters)}." \
                   f"{int(BIM['terrain'])}"
     return bldg_config
 

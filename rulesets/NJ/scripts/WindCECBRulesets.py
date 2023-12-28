@@ -114,17 +114,17 @@ def CECB_config(BIM):
         WWR = 'hig'
 
     if BIM['stories'] <= 2:
-        bldg_tag = 'CECBL'
+        bldg_tag = 'C.ECB.L'
     elif BIM['stories'] <= 5:
-        bldg_tag = 'CECBM'
+        bldg_tag = 'C.ECB.M'
     else:
-        bldg_tag = 'CECBH'
+        bldg_tag = 'C.ECB.H'
 
-    bldg_config = f"{bldg_tag}_" \
-                  f"{roof_cover}_" \
-                  f"{WWR}_" \
-                  f"{int(shutters)}_" \
-                  f"{WIDD}_" \
+    bldg_config = f"{bldg_tag}." \
+                  f"{roof_cover}." \
+                  f"{int(shutters)}." \
+                  f"{WIDD}." \
+                  f"{WWR}." \
                   f"{int(BIM['terrain'])}"
     return bldg_config
 

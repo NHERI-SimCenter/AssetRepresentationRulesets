@@ -94,7 +94,7 @@ def CERB_config(BIM):
         else:
             shutters = False
 
-    # Wind Debris (widd in HAZSU)
+    # Wind Debris (widd in HAZUS)
     # HAZUS A: Res/Comm, B: Varies by direction, C: Residential, D: None
     WIDD = 'C' # residential (default)
     if BIM['occupancy_class'] in ['RES1', 'RES2', 'RES3A', 'RES3B', 'RES3C',
@@ -114,16 +114,16 @@ def CERB_config(BIM):
         WWR = 'hig'
 
     if BIM['stories'] <= 2:
-        bldg_tag = 'CERBL'
+        bldg_tag = 'C.ERB.L'
     elif BIM['stories'] <= 5:
-        bldg_tag = 'CERBM'
+        bldg_tag = 'C.ERB.M'
     else:
-        bldg_tag = 'CERBH'
+        bldg_tag = 'C.ERB.H'
 
-    bldg_config = f"{bldg_tag}_" \
-                  f"{roof_cover}_" \
-                  f"{WWR}_" \
-                  f"{int(shutters)}_" \
-                  f"{WIDD}_" \
+    bldg_config = f"{bldg_tag}." \
+                  f"{roof_cover}." \
+                  f"{int(shutters)}." \
+                  f"{WIDD}." \
+                  f"{WWR}." \
                   f"{int(BIM['terrain'])}"
     return bldg_config

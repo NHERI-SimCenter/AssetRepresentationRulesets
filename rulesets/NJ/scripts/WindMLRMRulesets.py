@@ -178,16 +178,16 @@ def MLRM_config(BIM):
 
     if BIM['mean_roof_height'] < 15.0:
         # if it's MLRM1, configure outputs
-        bldg_config = f"MLRM1_" \
-                      f"{roof_cover}_" \
-                      f"{RDA}_" \
-                      f"{DQ}_" \
-                      f"{BIM['roof_system']}_" \
-                      f"{RWC}_" \
-                      f"{int(shutters)}_" \
-                      f"{WIDD}_" \
-                      f"{int(MR)}_" \
-                      f"{MRDA}_" \
+        bldg_config = f"M.LRM.1." \
+                      f"{roof_cover}." \
+                      f"{int(shutters)}." \
+                      f"{int(MR)}." \
+                      f"{WIDD}." \
+                      f"{BIM['roof_system']}." \
+                      f"{RDA}." \
+                      f"{RWC}." \
+                      f"{DQ}." \
+                      f"{MRDA}." \
                       f"{int(BIM['terrain'])}"
         return bldg_config
     else:
@@ -203,18 +203,19 @@ def MLRM_config(BIM):
                 JSPA = 4
                 unit_tag = 'mlt'
 
-        bldg_config = f"MLRM2_" \
-                      f"{roof_cover}_" \
-                      f"{RDA}_" \
-                      f"{DQ}_" \
-                      f"{BIM['roof_system']}_" \
-                      f"{JSPA}_" \
-                      f"{RWC}_" \
-                      f"{int(shutters)}_" \
-                      f"{WIDD}_" \
-                      f"{unit_tag}_" \
-                      f"{int(MR)}_" \
-                      f"{MRDA}_" \
+        bldg_config = f"M.LRM.2." \
+                      f"{roof_cover}." \
+                      f"{int(shutters)}." \
+                      f"{int(MR)}." \
+                      f"{WIDD}." \
+                      f"{BIM['roof_system']}." \
+                      f"{RDA}." \
+                      f"{RWC}." \
+                      f"{DQ}." \
+                      f"{MRDA}." \
+                      f"{unit_tag}." \
+                      f"{joist_spacing}." \
                       f"{int(BIM['terrain'])}"
-        return bldg_config
+        
+    return bldg_config
 
