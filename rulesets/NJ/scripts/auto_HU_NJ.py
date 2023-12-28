@@ -51,7 +51,7 @@ import datetime
 import math
 
 from WindMetaVarRulesets import parse_BIM
-from WindClassRulesets import building_class
+from BuildingClassRulesets import building_class
 from FloodAssmRulesets import Assm_config
 from FloodClassRulesets import FL_config
 from FloodRulesets import FL_config
